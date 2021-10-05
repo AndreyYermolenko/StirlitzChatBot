@@ -1,0 +1,10 @@
+/logs
+.idea
+/dispatcher/.idea
+/dispatcher/logs
+/dispatcher/.gitignore
+/dispatcher/target
+/node/.idea
+/node/logs
+/node/.gitignore
+/node/target
