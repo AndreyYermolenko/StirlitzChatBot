@@ -9,12 +9,6 @@
     <packaging>pom</packaging>
     <name>StirlitzBot</name>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.2</version>
-    </parent>
-
     <modules>
         <module>dispatcher</module>
         <module>node</module>
