@@ -8,3 +8,8 @@
 /node/logs
 /node/.gitignore
 /node/target
+
+dispatcher/src/main/resources/YOURPUBLIC.pem
+dispatcher/src/main/resources/myJks.jks
+dispatcher/src/main/resources/myPem.pem
+dispatcher/src/main/resources/myPkcs.p12
