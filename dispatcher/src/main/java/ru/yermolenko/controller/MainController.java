@@ -1,5 +1,6 @@
 package ru.yermolenko.controller;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -10,6 +11,7 @@ import ru.yermolenko.model.enam.RabbitQueue;
 import ru.yermolenko.service.RecordProducer;
 
 @Component
+@Log4j
 public class MainController {
     private final RecordProducer recordProducer;
     private DispatcherBot dispatcherBot;
@@ -84,10 +86,16 @@ public class MainController {
     }
 
     private SendMessage handleUnsupportedMessageType(Update update) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(update.getMessage().getChatId().toString());
-        sendMessage.setText("Unsupported message type!");
-        return sendMessage;
+        try {
+            Message message = update.getMessage() != null ? update.getMessage() : update.getEditedMessage();
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId().toString());
+            sendMessage.setText("Unsupported message type!");
+            return sendMessage;
+        } catch (NullPointerException e) {
+            log.debug(e);
+        }
+        return null;
     }
 
     private void fileIsReceivedMessage(Message message) {

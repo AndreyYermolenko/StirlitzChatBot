@@ -47,8 +47,8 @@ public class DispatcherBot extends TelegramWebhookBot {
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        mainController.mainHandler(update);
         log.debug(update);
+        mainController.mainHandler(update);
         return null;
     }
 
