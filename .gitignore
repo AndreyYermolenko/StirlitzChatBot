@@ -1,15 +1,16 @@
 /logs
 .idea
-/dispatcher/.idea
 /dispatcher/logs
-/dispatcher/.gitignore
 /dispatcher/target
-/node/.idea
 /node/logs
-/node/.gitignore
 /node/target
 
 dispatcher/src/main/resources/YOURPUBLIC.pem
 dispatcher/src/main/resources/myJks.jks
 dispatcher/src/main/resources/myPem.pem
 dispatcher/src/main/resources/myPkcs.p12
+dispatcher/src/main/resources/application.properties
+dispatcher/src/main/resources/application-dev.properties
+
+node/src/main/resources/application.properties
+node/src/main/resources/application-dev.properties
