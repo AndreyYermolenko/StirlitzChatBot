@@ -4,6 +4,7 @@
 /dispatcher/target
 /node/logs
 /node/target
+/scripts
 
 dispatcher/src/main/resources/YOURPUBLIC.pem
 dispatcher/src/main/resources/myJks.jks
