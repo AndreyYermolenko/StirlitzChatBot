@@ -6,10 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.yermolenko.exception.TokenRefreshException;
 import ru.yermolenko.model.RefreshToken;
 import ru.yermolenko.payload.request.LogOutRequest;
@@ -47,6 +44,16 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         MessageResponse messageResponse = userService.registerUser(signUpRequest);
 
+        if (messageResponse.hasError()) {
+            return ResponseEntity.badRequest().body(messageResponse.getMessage());
+        } else {
+            return ResponseEntity.ok(messageResponse.getMessage());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/confirm")
+    public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {
+        MessageResponse messageResponse = userService.confirmRegistration(id);
         if (messageResponse.hasError()) {
             return ResponseEntity.badRequest().body(messageResponse.getMessage());
         } else {

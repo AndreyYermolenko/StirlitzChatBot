@@ -1,5 +1,6 @@
 package ru.yermolenko.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MessageResponse {
 	private String message;
+	@JsonIgnore
 	private Boolean error;
 
 	public String getMessage() {

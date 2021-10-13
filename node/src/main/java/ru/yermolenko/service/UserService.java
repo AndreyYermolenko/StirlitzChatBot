@@ -5,4 +5,5 @@ import ru.yermolenko.payload.response.MessageResponse;
 
 public interface UserService {
     MessageResponse registerUser(SignupRequest signUpRequest);
+    MessageResponse confirmRegistration(String id);
 }
