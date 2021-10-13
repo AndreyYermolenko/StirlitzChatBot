@@ -18,10 +18,10 @@ import java.io.IOException;
 
 @RestController
 @Log4j
-public class ApiController {
+public class FileApiController {
     private final FileService fileService;
 
-    public ApiController(FileService fileService) {
+    public FileApiController(FileService fileService) {
         this.fileService = fileService;
     }
 

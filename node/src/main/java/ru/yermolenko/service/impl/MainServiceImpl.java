@@ -6,14 +6,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.dao.RawDataDAO;
-import ru.yermolenko.dao.UserDAO;
+import ru.yermolenko.dao.ServiceUserDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.service.*;
 
 @Log4j
 @Service
 public class MainServiceImpl implements MainService {
-    private final UserDAO userDAO;
+    private final ServiceUserDAO serviceUserDAO;
     private final DataMessageDAO dataMessageDAO;
     private final RawDataDAO rawDataDAO;
     private final BotService botService;
@@ -21,10 +21,10 @@ public class MainServiceImpl implements MainService {
     private final CollatzService collatzService;
     private final FileService fileService;
 
-    public MainServiceImpl(UserDAO userDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
+    public MainServiceImpl(ServiceUserDAO serviceUserDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
                            BotService botService, ProducerService producerService,
                            CollatzService collatzService, FileService fileService) {
-        this.userDAO = userDAO;
+        this.serviceUserDAO = serviceUserDAO;
         this.dataMessageDAO = dataMessageDAO;
         this.rawDataDAO = rawDataDAO;
         this.botService = botService;
@@ -34,18 +34,18 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public User findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser) {
-        User persistentUser = userDAO.findUserByExternalServiceId(externalServiceUser.getId());
-        if (persistentUser == null) {
-            User transientUser = User.builder()
+    public ServiceUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser) {
+        ServiceUser persistentServiceUser = serviceUserDAO.findUserByExternalServiceId(externalServiceUser.getId());
+        if (persistentServiceUser == null) {
+            ServiceUser transientServiceUser = ServiceUser.builder()
                     .externalServiceId(externalServiceUser.getId())
                     .username(externalServiceUser.getUserName())
                     .firstName(externalServiceUser.getFirstName())
                     .lastName(externalServiceUser.getLastName())
                     .build();
-            return userDAO.save(transientUser);
+            return serviceUserDAO.save(transientServiceUser);
         }
-        return persistentUser;
+        return persistentServiceUser;
     }
 
     private DataMessage prepareDataMessage(MessageRecord messageRecord) {
@@ -53,10 +53,10 @@ public class MainServiceImpl implements MainService {
         DataMessage persistentDataMessage = dataMessageDAO.findMessageByExternalServiceId(
                 message.getMessageId());
         if (persistentDataMessage == null) {
-            User persistentUser = findOrSaveUser(messageRecord.getMessage().getFrom());
+            ServiceUser persistentServiceUser = findOrSaveUser(messageRecord.getMessage().getFrom());
             return DataMessage.builder()
                     .externalServiceId(message.getMessageId())
-                    .user(persistentUser)
+                    .serviceUser(persistentServiceUser)
                     .chatId(message.getChatId())
                     .chatType(ChatType.valueOf(message.getChat().getType().toUpperCase()))
                     .unixTimeFromExternalService(message.getDate())
