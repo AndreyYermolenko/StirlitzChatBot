@@ -111,11 +111,6 @@ public class FileServiceImpl implements FileService {
     }
 
     private byte[] downloadFile(String filePath, Integer contentLength) {
-        try {
-            Thread.sleep(6000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         String fullUrl = fileStorageUrl.replace("{token}", token)
                 .replace("{filePath}", filePath);
         URL urlObj = null;
