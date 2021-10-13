@@ -18,6 +18,7 @@ import java.io.IOException;
 
 @RestController
 @Log4j
+@RequestMapping("/api/file")
 public class FileApiController {
     private final FileService fileService;
 

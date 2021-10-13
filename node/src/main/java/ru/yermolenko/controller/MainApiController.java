@@ -1,35 +1,38 @@
 package ru.yermolenko.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yermolenko.dao.DataMessageDAO;
+import ru.yermolenko.model.DataMessage;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping("/api/data")
 public class MainApiController {
-	@GetMapping("/all")
-	public String allAccess() {
-		return "Public Content.";
-	}
-	
-	@GetMapping("/user")
-	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-	public String userAccess() {
-		return "User Content.";
-	}
+	private final DataMessageDAO dataMessageDAO;
 
-	@GetMapping("/mod")
-	@PreAuthorize("hasRole('MODERATOR')")
-	public String moderatorAccess() {
-		return "Moderator Board.";
+	public MainApiController(DataMessageDAO dataMessageDAO) {
+		this.dataMessageDAO = dataMessageDAO;
 	}
+//	@GetMapping("/all")
+//	public String allAccess() {
+//		return "Public Content.";
+//	}
+//
+//	@GetMapping("/user")
+//	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//	public String userAccess() {
+//		return "User Content.";
+//	}
 
-	@GetMapping("/admin")
+	@GetMapping("/get_all_messages")
 	@PreAuthorize("hasRole('ADMIN')")
-	public String adminAccess() {
-		return "Admin Board.";
+	public ResponseEntity<String> getAllMessages() {
+		List<DataMessage> dataMessages = dataMessageDAO.findAll();
+		return ResponseEntity.ok().body(dataMessages.toString());
 	}
 }
