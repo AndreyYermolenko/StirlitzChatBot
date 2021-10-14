@@ -54,7 +54,7 @@ public class MethodArgumentNotValidExceptionHandler {
         }
 
         public void addFieldError(String path, String message) {
-            FieldError error = new FieldError(path, message, "validation");
+            FieldError error = new FieldError(path, message, "");
             fieldErrors.add(error);
         }
 
