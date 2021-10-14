@@ -42,13 +42,12 @@ public class UserServiceImpl implements UserService {
         if (userByUsername != null) {
             if (userByUsername.getIsActive()) {
                 return MessageResponse.builder()
-                        .message("Error: Username is already taken!")
+                        .message("Username is already taken!")
                         .error(true)
                         .build();
             } else {
                 return MessageResponse.builder()
-                        .message("Please confirm your registration! \n Go to link: " +
-                                createLinkForConfirm(userByUsername.getId()))
+                        .linkForConfirmation(createLinkForConfirm(userByUsername.getId()))
                         .error(true)
                         .build();
             }
@@ -58,13 +57,12 @@ public class UserServiceImpl implements UserService {
         if (userByEmail != null) {
             if (userByEmail.getIsActive()) {
                 return MessageResponse.builder()
-                        .message("Error: Email is already in use!")
+                        .message("Email is already in use!")
                         .error(true)
                         .build();
             } else {
                 return MessageResponse.builder()
-                        .message("Please confirm your registration! \n Go to link: " +
-                                createLinkForConfirm(userByEmail.getId()))
+                        .linkForConfirmation(createLinkForConfirm(userByEmail.getId()))
                         .error(true)
                         .build();
             }
@@ -78,20 +76,20 @@ public class UserServiceImpl implements UserService {
 
         if (rolesFromRequest == null || rolesFromRequest.isEmpty()) {
             Role userRole = roleDAO.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> new RuntimeException("Role is not found."));
             roles.add(userRole);
         } else {
             rolesFromRequest.forEach(role -> {
                 switch (role) {
                     case "admin":
                         Role adminRole = roleDAO.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException("Role is not found."));
                         roles.add(adminRole);
 
                         break;
                     case "user":
                         Role userRole = roleDAO.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException("Role is not found."));
                         roles.add(userRole);
 
                         break;
@@ -105,7 +103,7 @@ public class UserServiceImpl implements UserService {
         String urlToConfirm = createLinkForConfirm(persistentUser.getId());
 
         return MessageResponse.builder()
-                .message("Please confirm your registration! \n Go to link: " + urlToConfirm)
+                .linkForConfirmation(urlToConfirm)
                 .error(false)
                 .build();
     }

@@ -45,11 +45,12 @@ public class AuthController {
     @PostMapping("/sign_up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         MessageResponse messageResponse = userService.registerUser(signUpRequest);
+        log.debug(messageResponse);
 
         if (messageResponse.hasError()) {
-            return ResponseEntity.badRequest().body(messageResponse.getMessage());
+            return ResponseEntity.badRequest().body(messageResponse);
         } else {
-            return ResponseEntity.ok(messageResponse.getMessage());
+            return ResponseEntity.ok(messageResponse);
         }
     }
 
@@ -103,6 +104,6 @@ public class AuthController {
     public ResponseEntity<?> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         refreshTokenService.deleteByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(new MessageResponse("Log out successful!", false));
+        return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!"));
     }
 }
