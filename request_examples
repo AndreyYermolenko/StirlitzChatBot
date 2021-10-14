@@ -1,0 +1,41 @@
+POST http://localhost:8051/api/auth/sign_up
+
+{
+    "username": "odmen",
+    "email": "odmen@mail.ru",
+    "role": [ "user", "admin"],
+    "password": "123456"
+}
+
+{
+    "username": "uzer",
+    "email": "uzer@mail.ru",
+    "password": "123456"
+}
+
+POST http://localhost:8051/api/auth/sign_in
+Content-Type: application/json
+
+{
+    "username": "odmen",
+    "password": "123456"
+}
+
+{
+    "username": "uzer",
+    "password": "123456"
+}
+
+POST http://localhost:8051/api/auth/refresh_token
+
+{
+    "refreshToken":"qweqweqweqweqwqwqeq"
+}
+
+POST http://localhost:8051/api/auth/logout
+
+{
+    "username":"uzer"
+}
+
+GET http://localhost:8051/api/data/get_all_messages

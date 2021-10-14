@@ -1,6 +1,7 @@
 package ru.yermolenko.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -16,6 +17,7 @@ import java.util.Set;
 			@UniqueConstraint(columnNames = "email") 
 		})
 @Data
+@NoArgsConstructor
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,9 +42,6 @@ public class User {
 				inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
 	private Boolean isActive;
-
-	public User() {
-	}
 
 	public User(String username, String email, String password) {
 		this.username = username;

@@ -1,7 +1,12 @@
 package ru.yermolenko.payload.error;
 
+import lombok.Builder;
+import lombok.Getter;
+
 import java.util.Date;
 
+@Getter
+@Builder
 public class ErrorMessage {
     private int statusCode;
     private Date timestamp;
@@ -13,21 +18,5 @@ public class ErrorMessage {
         this.timestamp = timestamp;
         this.message = message;
         this.description = description;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }

@@ -1,6 +1,8 @@
 package ru.yermolenko.controller;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -9,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.yermolenko.exception.TokenRefreshException;
 import ru.yermolenko.model.RefreshToken;
-import ru.yermolenko.payload.request.LogOutRequest;
 import ru.yermolenko.payload.request.LoginRequest;
 import ru.yermolenko.payload.request.SignupRequest;
 import ru.yermolenko.payload.request.TokenRefreshRequest;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
+@Log4j
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
@@ -96,9 +98,11 @@ public class AuthController {
                     "Refresh token is not in database!"));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(@Valid @RequestBody LogOutRequest logOutRequest) {
-        refreshTokenService.deleteByUserId(logOutRequest.getUserId());
+    @GetMapping("/logout")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> logoutUser() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        refreshTokenService.deleteByUsername(userDetails.getUsername());
         return ResponseEntity.ok(new MessageResponse("Log out successful!", false));
     }
 }

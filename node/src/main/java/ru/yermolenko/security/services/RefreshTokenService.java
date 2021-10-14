@@ -51,7 +51,12 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public int deleteByUserId(Long userId) {
-        return refreshTokenDAO.deleteByUser(userDAO.findById(userId).get());
+    public int deleteByUsername(String username) {
+        return refreshTokenDAO.deleteByUser(userDAO.findByUsername(username).get());
+    }
+
+    @Transactional
+    public int deleteByUserId(Long id) {
+        return refreshTokenDAO.deleteByUser(userDAO.findById(id).get());
     }
 }

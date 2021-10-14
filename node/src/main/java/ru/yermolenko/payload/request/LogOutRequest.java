@@ -1,9 +1,8 @@
 package ru.yermolenko.payload.request;
 
-public class LogOutRequest {
-    private Long userId;
+import lombok.Getter;
 
-    public Long getUserId() {
-        return this.userId;
-    }
+@Getter
+public class LogOutRequest {
+    private String username;
 }

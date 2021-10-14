@@ -1,25 +1,17 @@
 package ru.yermolenko.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageResponse {
+	@Getter
+	@Setter
 	private String message;
 	@JsonIgnore
 	private Boolean error;
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
 
 	public boolean hasError() {
 		return this.error;
