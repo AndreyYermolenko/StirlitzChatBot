@@ -180,4 +180,52 @@ class UserServiceImplTest {
         Mockito.verify(mailSenderService, Mockito.times(0))
                 .send(anyString(), eq(("Activation")), anyString());
     }
+
+    /**
+     * Failed test variation when username is already taken.
+     */
+    @Test
+    void registerUserFailed2() {
+        SignupRequest sr = SignupRequest.builder()
+                .username("John")
+                .email("john.jackson@mail.ru")
+                .password("p@ssw0rd")
+                .build();
+
+        Mockito.doReturn(Optional.of(User.builder().isActive(true).build()))
+                .when(userDAO)
+                .findByUsername(sr.getUsername());
+
+        MessageResponse messageResponse = userService.registerUser(sr);
+
+        String failedMessage = "Username is already taken!";
+        assertEquals(failedMessage, messageResponse.getMessage());
+        assertTrue(messageResponse.hasError());
+        Mockito.verify(mailSenderService, Mockito.times(0))
+                .send(anyString(), eq(("Activation")), anyString());
+    }
+
+    /**
+     * Failed test variation when email is already taken.
+     */
+    @Test
+    void registerUserFailed3() {
+        SignupRequest sr = SignupRequest.builder()
+                .username("John")
+                .email("john.jackson@mail.ru")
+                .password("p@ssw0rd")
+                .build();
+
+        Mockito.doReturn(Optional.of(User.builder().isActive(true).build()))
+                .when(userDAO)
+                .findByEmail(sr.getEmail());
+
+        MessageResponse messageResponse = userService.registerUser(sr);
+
+        String failedMessage = "Email is already in use!";
+        assertEquals(failedMessage, messageResponse.getMessage());
+        assertTrue(messageResponse.hasError());
+        Mockito.verify(mailSenderService, Mockito.times(0))
+                .send(anyString(), eq(("Activation")), anyString());
+    }
 }
