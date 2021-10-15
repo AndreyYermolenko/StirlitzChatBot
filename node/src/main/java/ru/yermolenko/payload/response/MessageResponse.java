@@ -13,7 +13,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.*;
 @Data
 public class MessageResponse {
 	private String message;
-	private String linkForConfirmation;
 	@JsonIgnore
 	private Boolean error;
 

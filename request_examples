@@ -39,3 +39,6 @@ POST http://localhost:8051/api/auth/logout
 }
 
 GET http://localhost:8051/api/data/get_all_messages
+
+INSERT INTO role(name) VALUES('ROLE_USER');
+INSERT INTO role(name) VALUES('ROLE_ADMIN');

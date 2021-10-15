@@ -11,6 +11,7 @@ import ru.yermolenko.model.Role;
 import ru.yermolenko.model.User;
 import ru.yermolenko.payload.request.SignupRequest;
 import ru.yermolenko.payload.response.MessageResponse;
+import ru.yermolenko.service.MailSenderService;
 import ru.yermolenko.service.UserService;
 import ru.yermolenko.tools.CryptoTool;
 
@@ -24,21 +25,33 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder encoder;
     private final RoleDAO roleDAO;
     private final CryptoTool cryptoTool;
+    private final MailSenderService mailSenderService;
     @Value("${link.address}")
     private String linkAddress;
     @Value("${server.port}")
     private String serverPort;
 
-    public UserServiceImpl(UserDAO userDAO, PasswordEncoder encoder, RoleDAO roleDAO, CryptoTool cryptoTool) {
+    public UserServiceImpl(UserDAO userDAO, PasswordEncoder encoder, RoleDAO roleDAO,
+                           CryptoTool cryptoTool, MailSenderService mailSenderService) {
         this.userDAO = userDAO;
         this.encoder = encoder;
         this.roleDAO = roleDAO;
         this.cryptoTool = cryptoTool;
+        this.mailSenderService = mailSenderService;
     }
 
     @Override
     public MessageResponse registerUser(SignupRequest signUpRequest) {
         User userByUsername = userDAO.findByUsername(signUpRequest.getUsername()).orElse(null);
+        User userByEmail = userDAO.findByEmail(signUpRequest.getEmail()).orElse(null);
+        if (userByUsername != null && !userByUsername.getIsActive() && userByEmail == null) {
+            return MessageResponse.builder()
+                    .message("Please check your email which you sent early for activation " +
+                            "else choose a new username with current email!")
+                    .error(true)
+                    .build();
+        }
+
         if (userByUsername != null) {
             if (userByUsername.getIsActive()) {
                 return MessageResponse.builder()
@@ -46,14 +59,15 @@ public class UserServiceImpl implements UserService {
                         .error(true)
                         .build();
             } else {
+                String message = createTextMessageForConfirmation(userByUsername.getId());
+                mailSenderService.send(userByUsername.getEmail(), "Activation", message);
                 return MessageResponse.builder()
-                        .linkForConfirmation(createLinkForConfirm(userByUsername.getId()))
-                        .error(true)
+                        .message("Please check your email and go to activate link!")
+                        .error(false)
                         .build();
             }
         }
 
-        User userByEmail = userDAO.findByEmail(signUpRequest.getEmail()).orElse(null);
         if (userByEmail != null) {
             if (userByEmail.getIsActive()) {
                 return MessageResponse.builder()
@@ -61,9 +75,11 @@ public class UserServiceImpl implements UserService {
                         .error(true)
                         .build();
             } else {
+                String message = createTextMessageForConfirmation(userByEmail.getId());
+                mailSenderService.send(userByEmail.getEmail(), "Activation", message);
                 return MessageResponse.builder()
-                        .linkForConfirmation(createLinkForConfirm(userByEmail.getId()))
-                        .error(true)
+                        .message("Please check your email and go to activate link!")
+                        .error(false)
                         .build();
             }
         }
@@ -100,10 +116,11 @@ public class UserServiceImpl implements UserService {
         user.setRoles(roles);
         user.setIsActive(false);
         User persistentUser = userDAO.save(user);
-        String urlToConfirm = createLinkForConfirm(persistentUser.getId());
 
+        String message = createTextMessageForConfirmation(persistentUser.getId());
+        mailSenderService.send(persistentUser.getEmail(), "Activation", message);
         return MessageResponse.builder()
-                .linkForConfirmation(urlToConfirm)
+                .message("Please check your email and go to activate link!")
                 .error(false)
                 .build();
     }
@@ -129,7 +146,7 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    private String createLinkForConfirm(Long userId) {
+    private String createTextMessageForConfirmation(Long userId) {
         String hash = cryptoTool.hashOf(userId);
         return "http://" + linkAddress + ":" + serverPort + "/api/auth/confirm?id=" + hash;
     }
