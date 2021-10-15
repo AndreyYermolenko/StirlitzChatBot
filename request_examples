@@ -1,5 +1,4 @@
 POST http://localhost:8051/api/auth/sign_up
-curl -d '{"username": "77777odmen","email": "lakorar402@settags.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
 
 {
     "username": "odmen",
@@ -16,7 +15,6 @@ curl -d '{"username": "77777odmen","email": "lakorar402@settags.com", "role": [ 
 
 POST http://localhost:8051/api/auth/sign_in
 Content-Type: application/json
-curl -d '{"username": "77777odmen","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
 
 
 {
@@ -30,19 +28,33 @@ curl -d '{"username": "77777odmen","password": "123456"}' http://10.10.108.221:8
 }
 
 POST http://localhost:8051/api/auth/refresh_token
-curl -d '{"refreshToken": "c1f3d644-7a5d-46f2-9454-dff827ae3c8b"}' http://10.10.108.221:8051/api/auth/refresh_token
 
 {
     "refreshToken":"qweqweqweqweqwqwqeq"
 }
 
 GET http://localhost:8051/api/auth/logout
-curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwiaWF0IjoxNjM0MjkwODI2LCJleHAiOjE2MzQyOTQ0MjZ9.MvFM8jHSIzpN3bHYHlCRI-XiRU_8Yx4RgRGM3C_KYMW7g85L6eIYgrUo_OmscReZiZQ_CeaF1cQhCNgpMjjuig' http://10.10.108.221:8051/api/auth/logout
 
 
 GET http://localhost:8051/api/data/get_all_messages
-curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwiaWF0IjoxNjM0MjkwMjIzLCJleHAiOjE2MzQyOTM4MjN9.9noEgkX5Qgy-FGMKtdl1tsEYcM1LaP_7gcbS3rZOtZGQDNjFqzrB7LqG28MsupgSzJ3GcobTNmDoCPdtVXMymg' http://10.10.108.221:8051/api/data/get_all_messages
 
 
 INSERT INTO role(name) VALUES('ROLE_USER');
 INSERT INTO role(name) VALUES('ROLE_ADMIN');
+
+
+Регистрация:
+curl -d '{"username": "77777odmen","email": "lakorar402@settags.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
+
+Авторизация:
+curl -d '{"username": "77777odmen","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
+
+Получение новой пары токенов:
+curl -d '{"refreshToken": "c1f3d644-7a5d-46f2-9454-dff827ae3c8b"}' http://10.10.108.221:8051/api/auth/refresh_token
+
+Логаут:
+curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwiaWF0IjoxNjM0MjkwODI2LCJleHAiOjE2MzQyOTQ0MjZ9.MvFM8jHSIzpN3bHYHlCRI-XiRU_8Yx4RgRGM3C_KYMW7g85L6eIYgrUo_OmscReZiZQ_CeaF1cQhCNgpMjjuig' http://10.10.108.221:8051/api/auth/logout
+
+Получить все сообщения (только для админа):
+curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwiaWF0IjoxNjM0MjkwMjIzLCJleHAiOjE2MzQyOTM4MjN9.9noEgkX5Qgy-FGMKtdl1tsEYcM1LaP_7gcbS3rZOtZGQDNjFqzrB7LqG28MsupgSzJ3GcobTNmDoCPdtVXMymg' http://10.10.108.221:8051/api/data/get_all_messages
+
