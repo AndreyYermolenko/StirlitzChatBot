@@ -104,6 +104,6 @@ public class AuthController {
     public ResponseEntity<?> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         refreshTokenService.deleteByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!"));
+        return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!").build());
     }
 }
