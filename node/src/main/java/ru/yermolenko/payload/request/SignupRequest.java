@@ -1,5 +1,6 @@
 package ru.yermolenko.payload.request;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -8,6 +9,7 @@ import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Data
+@Builder
 public class SignupRequest {
     @NotBlank
     @Size(min = 3, max = 20)
