@@ -1,6 +1,8 @@
 package ru.yermolenko.service;
 
 import ru.yermolenko.model.*;
+import ru.yermolenko.payload.request.MessageHistoryRequest;
+import ru.yermolenko.payload.response.MessageHistoryResponse;
 
 public interface MainService {
     void saveRawData(GeneralRecord generalRecord);
@@ -8,4 +10,5 @@ public interface MainService {
     void saveOrModifyTextMessage(MessageRecord messageRecord);
     void saveOrModifyDocument(MessageRecord messageRecord);
     void saveOrModifyPhoto(MessageRecord messageRecord);
+    MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest);
 }
