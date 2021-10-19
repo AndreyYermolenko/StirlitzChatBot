@@ -148,24 +148,34 @@ public class MainServiceImpl implements MainService {
 
     @Override
     public MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest) {
-        Optional<UserApiKey> userApiKey = userApiKeyDAO.findByApiKey(
+        Optional<UserApiKey> optUserApiKey = userApiKeyDAO.findByApiKey(
                 messageHistoryRequest.getUserApiKey());
-        if (userApiKey.isEmpty()) {
+        if (optUserApiKey.isEmpty()) {
             return MessageHistoryResponse.builder()
                     .error(true)
                     .errorMessage("API key isn't found!")
                     .build();
         }
-        Optional<List<DataMessage>> dataMessages = dataMessageDAO.findLastMessagesByChatId(
+        Optional<List<DataMessage>> optDataMessages = dataMessageDAO.findLastMessagesByChatId(
                 messageHistoryRequest.getChatId(),
                 messageHistoryRequest.getLimit());
-        if (dataMessages.isEmpty()) {
+        if (optDataMessages.isEmpty()) {
             return MessageHistoryResponse.builder()
                     .error(true)
                     .errorMessage("Messages aren't found!")
                     .build();
         } else {
-            return MessageHistoryResponse.builder().messages(dataMessages.get()).build();
+            Long currentServiceUserId = optUserApiKey.get().getServiceUser().getId();
+            boolean isCurrentServiceUserMessages = optDataMessages.get().stream().allMatch(x ->
+                    x.getServiceUser().getId().equals(currentServiceUserId));
+            if (isCurrentServiceUserMessages) {
+                return MessageHistoryResponse.builder().messages(optDataMessages.get()).build();
+            } else {
+                return MessageHistoryResponse.builder()
+                        .error(true)
+                        .errorMessage("Wrong chatId!")
+                        .build();
+            }
         }
     }
 

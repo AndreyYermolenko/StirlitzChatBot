@@ -38,7 +38,7 @@ public class MainApiController {
 		log.debug(request);
 		MessageHistoryResponse result = mainService.getLastMessages(request);
 		if (result.hasError()) {
-			return ResponseEntity.badRequest().body(result.getErrorMessage());
+			return ResponseEntity.badRequest().body(result);
 		} else {
 			return ResponseEntity.ok().body(result);
 		}

@@ -76,4 +76,4 @@ curl -d '{"username": "uzer1177","email": "lakorar402@settags.com", "password": 
 curl -d '{"username": "uzer1177","password": "123456"}' http://10.10.0.162:8051/api/auth/sign_in
 
 Получить последние N сообщений
-curl -d '{"userApiKey": "zzz111","chatId": "222", "limit":"1"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1emVyMTE3NyIsImlhdCI6MTYzNDU3MTgwNCwiZXhwIjoxNjM0NTc1NDA0fQ.h_yZkfL_-9p7usVAguZZBoDoZz1AA2FnI-NOv79Zih19zTkzKajNaFcXX65GZIm8lT9Bom_wjKdTR3LGsv_-jg' http://10.10.0.162:8051/api/data/get_last_messages
+curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1emVyMTE3NyIsImlhdCI6MTYzNDYyOTA1OCwiZXhwIjoxNjM0NjMyNjU4fQ.cOdFAq_4JP-T7vrbDb1w1mO-udj6dMfMo6M4HTjyxAED7nMUmQciqNdKDMjPM2nWPzneUinlqJoJatvZKzDOZA' http://10.10.0.162:8051/api/data/get_last_messages
