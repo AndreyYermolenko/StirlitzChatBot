@@ -14,13 +14,18 @@ import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.dao.ServiceUserDAO;
 import ru.yermolenko.dao.UserApiKeyDAO;
 import ru.yermolenko.model.*;
+import ru.yermolenko.payload.request.MessageHistoryRequest;
+import ru.yermolenko.payload.response.MessageHistoryResponse;
 import ru.yermolenko.service.BotService;
 import ru.yermolenko.service.CollatzService;
 import ru.yermolenko.service.MainService;
 import ru.yermolenko.service.ProducerService;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 
 @SpringBootTest
@@ -287,7 +292,169 @@ class MainServiceImplTest {
                         .build());
     }
 
+    /**
+     * API key isn't found.
+     */
     @Test
-    void getLastMessages() {
+    void getLastMessagesPart1() {
+        String api_key = "some_api_key";
+        MessageHistoryRequest request = MessageHistoryRequest.builder()
+                .userApiKey(api_key)
+                .chatId(11111L)
+                .limit(5)
+                .build();
+
+        MessageHistoryResponse expectedResponse = MessageHistoryResponse.builder()
+                .error(true)
+                .errorMessage("API key isn't found!")
+                .build();
+
+        Mockito.doReturn(Optional.empty())
+                .when(userApiKeyDAO)
+                .findByApiKey(api_key);
+
+        MessageHistoryResponse response = mainService.getLastMessages(request);
+        assertEquals(expectedResponse, response);
+
+        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+                .findByApiKey(eq(api_key));
+    }
+
+    /**
+     * Messages aren't found.
+     */
+    @Test
+    void getLastMessagesPart2() {
+        String api_key = "some_api_key";
+        MessageHistoryRequest request = MessageHistoryRequest.builder()
+                .userApiKey(api_key)
+                .chatId(11111L)
+                .limit(5)
+                .build();
+
+        MessageHistoryResponse expectedResponse = MessageHistoryResponse.builder()
+                .error(true)
+                .errorMessage("Messages aren't found!")
+                .build();
+
+        Mockito.doReturn(Optional.of(new UserApiKey()))
+                .when(userApiKeyDAO)
+                .findByApiKey(api_key);
+        Mockito.doReturn(Optional.empty())
+                .when(dataMessageDAO)
+                .findLastMessagesByChatId(request.getChatId(), request.getLimit());
+
+        MessageHistoryResponse response = mainService.getLastMessages(request);
+        assertEquals(expectedResponse, response);
+
+        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+                .findByApiKey(eq(api_key));
+        Mockito.verify(dataMessageDAO, Mockito.times(1))
+                .findLastMessagesByChatId(request.getChatId(), request.getLimit());
+    }
+
+    /**
+     * Wrong chatId.
+     */
+    @Test
+    void getLastMessagesPart3() {
+        String api_key = "some_api_key";
+        MessageHistoryRequest request = MessageHistoryRequest.builder()
+                .userApiKey(api_key)
+                .chatId(11111L)
+                .limit(5)
+                .build();
+
+        ServiceUser persistentServiceUser = ServiceUser.builder()
+                .id(1L)
+                .externalServiceId(45678)
+                .username("vano")
+                .firstName("Ivan")
+                .lastName("Susanin")
+                .build();
+
+        MessageHistoryResponse expectedResponse = MessageHistoryResponse.builder()
+                .error(true)
+                .errorMessage("Wrong chatId!")
+                .build();
+
+        DataMessage message1 = DataMessage.builder()
+                .serviceUser(ServiceUser.builder().id(2L).build())
+                .build();
+        DataMessage message2 = DataMessage.builder()
+                .serviceUser(ServiceUser.builder().id(1L).build())
+                .build();
+        List<DataMessage> dataMessages = Arrays.asList(message1, message2);
+
+        Mockito.doReturn(Optional.of(UserApiKey.builder()
+                        .id(1L)
+                        .apiKey(api_key)
+                        .serviceUser(persistentServiceUser)
+                        .build()))
+                .when(userApiKeyDAO)
+                .findByApiKey(api_key);
+        Mockito.doReturn(Optional.of(dataMessages))
+                .when(dataMessageDAO)
+                .findLastMessagesByChatId(request.getChatId(), request.getLimit());
+
+        MessageHistoryResponse response = mainService.getLastMessages(request);
+        assertEquals(expectedResponse, response);
+
+        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+                .findByApiKey(eq(api_key));
+        Mockito.verify(dataMessageDAO, Mockito.times(1))
+                .findLastMessagesByChatId(request.getChatId(), request.getLimit());
+    }
+
+    /**
+     * Success.
+     */
+    @Test
+    void getLastMessagesPart4() {
+        String api_key = "some_api_key";
+        MessageHistoryRequest request = MessageHistoryRequest.builder()
+                .userApiKey(api_key)
+                .chatId(11111L)
+                .limit(5)
+                .build();
+
+        ServiceUser persistentServiceUser = ServiceUser.builder()
+                .id(1L)
+                .externalServiceId(45678)
+                .username("vano")
+                .firstName("Ivan")
+                .lastName("Susanin")
+                .build();
+
+        DataMessage message1 = DataMessage.builder()
+                .serviceUser(ServiceUser.builder().id(1L).build())
+                .build();
+        DataMessage message2 = DataMessage.builder()
+                .serviceUser(ServiceUser.builder().id(1L).build())
+                .build();
+        List<DataMessage> dataMessages = Arrays.asList(message1, message2);
+        MessageHistoryResponse expectedResponse = MessageHistoryResponse.builder()
+                .error(false)
+                .messages(dataMessages)
+                .build();
+
+        Mockito.doReturn(Optional.of(UserApiKey.builder()
+                        .id(1L)
+                        .apiKey(api_key)
+                        .serviceUser(persistentServiceUser)
+                        .build()))
+                .when(userApiKeyDAO)
+                .findByApiKey(api_key);
+        Mockito.doReturn(Optional.of(dataMessages))
+                .when(dataMessageDAO)
+                .findLastMessagesByChatId(request.getChatId(), request.getLimit());
+
+        MessageHistoryResponse response = mainService.getLastMessages(request);
+        assertEquals(expectedResponse, response);
+
+        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+                .findByApiKey(eq(api_key));
+        Mockito.verify(dataMessageDAO, Mockito.times(1))
+                .findLastMessagesByChatId(request.getChatId(), request.getLimit());
     }
 }
