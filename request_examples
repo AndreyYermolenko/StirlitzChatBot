@@ -48,7 +48,7 @@ curl -d '{"username": "odmen1","email": "lakorar402@settags.com", "role": [ "use
 curl -d '{"username": "uzer1","email": "lakorar402@settags.com", "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
 
 Авторизация:
-curl -d '{"username": "uzer1","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
+curl -d '{"username": "odmen1","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
 
 Получить последние N сообщений
 curl -d '{"userApiKey": "df92eb71-6baf-4cb5-b056-c79c0000f18d","chatId": "594441532", "limit":"5"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1emVyMSIsImlhdCI6MTYzNDU3MDE4MiwiZXhwIjoxNjM0NTczNzgyfQ.6Z-QwdN7FyLUfk0mhtTOmJ3V_cu0a3GfOVoI_kdg4z5A4Jz6raL8KGlFrDEfltwoDojrNkx0MNLt7ftOBwklGw' http://10.10.108.221:8051/api/data/get_last_messages
@@ -63,6 +63,8 @@ curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwi
 Получить все сообщения (только для админа):
 curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ1NDAwMjksImV4cCI6MTYzNDU0MzYyOX0.2Q3GrHrIzrEZbZ032zxUFWEbIIMkCO83QkpnvoyGoz_jjhhaKpfx_Bm1xQxMd_XL0qOW5-Xn10VzYYOEgXKrLw' http://10.10.108.221:8051/api/data/get_all_messages
 
+Отправить сообщение от имени бота (только для админа):
+curl -d '{"chatId": "594441532", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ2NTAwODYsImV4cCI6MTYzNDY1MzY4Nn0.4rEMRcy7j1M11O6UiqY1UMRxBoeQJxGLWqExdznx6I3TGhCvtJRyW-VyDk570evHmcQvTJl7_AjkFPPiExp-Gg' http://10.10.108.221:8051/api/data/send_message
 
 
 
@@ -71,9 +73,14 @@ curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQi
 
 Регистрация:
 curl -d '{"username": "uzer1177","email": "lakorar402@settags.com", "password": "123456"}' http://10.10.0.162:8051/api/auth/sign_up
+curl -d '{"username": "odmen1177","email": "lakorar402@settags.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.0.162:8051/api/auth/sign_up
 
 Авторизация:
-curl -d '{"username": "uzer1177","password": "123456"}' http://10.10.0.162:8051/api/auth/sign_in
+curl -d '{"username": "odmen1177","password": "123456"}' http://10.10.0.162:8051/api/auth/sign_in
 
 Получить последние N сообщений
 curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1emVyMTE3NyIsImlhdCI6MTYzNDYyOTA1OCwiZXhwIjoxNjM0NjMyNjU4fQ.cOdFAq_4JP-T7vrbDb1w1mO-udj6dMfMo6M4HTjyxAED7nMUmQciqNdKDMjPM2nWPzneUinlqJoJatvZKzDOZA' http://10.10.0.162:8051/api/data/get_last_messages
+
+Отправить сообщение от имени бота:
+curl -d '{"chatId": "333", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ2NDk4MjgsImV4cCI6MTYzNDY1MzQyOH0.B9zvlAQf05jnFbcEyZ5bahnNCCR73O5c91NNsQ5WWFmS1ZVSLeK_oNcDpzqvMC9PXl3H6ePli2FLLg4oT18oxw' http://10.10.0.162:8051/api/data/send_message
+

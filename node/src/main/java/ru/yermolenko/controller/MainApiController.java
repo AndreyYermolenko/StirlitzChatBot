@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.model.DataMessage;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
+import ru.yermolenko.payload.request.TextMessageRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
 import ru.yermolenko.service.MainService;
 
@@ -42,5 +43,13 @@ public class MainApiController {
 		} else {
 			return ResponseEntity.ok().body(result);
 		}
+	}
+
+	@PostMapping("/send_message")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> sendMessage(@Valid @RequestBody TextMessageRequest request) {
+		log.debug(request);
+		mainService.sendTextMessage(request);
+		return ResponseEntity.ok().build();
 	}
 }

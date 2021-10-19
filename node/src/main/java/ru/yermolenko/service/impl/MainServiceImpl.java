@@ -10,6 +10,7 @@ import ru.yermolenko.dao.ServiceUserDAO;
 import ru.yermolenko.dao.UserApiKeyDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
+import ru.yermolenko.payload.request.TextMessageRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
 import ru.yermolenko.service.*;
 
@@ -177,6 +178,11 @@ public class MainServiceImpl implements MainService {
                         .build();
             }
         }
+    }
+
+    @Override
+    public void sendTextMessage(TextMessageRequest request) {
+        sendAnswer(request.getMessage(), request.getChatId().toString());
     }
 
     public void saveRawData(GeneralRecord generalRecord) {
