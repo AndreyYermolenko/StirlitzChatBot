@@ -57,7 +57,7 @@ public class MainServiceImpl implements MainService {
         return persistentServiceUser;
     }
 
-    private DataMessage prepareDataMessage(MessageRecord messageRecord) {
+    private DataMessage findOrCreateDataMessage(MessageRecord messageRecord) {
         Message message = messageRecord.getMessage();
         DataMessage persistentDataMessage = dataMessageDAO.findMessageByExternalServiceId(
                 message.getMessageId());
@@ -78,7 +78,7 @@ public class MainServiceImpl implements MainService {
 
     @Override
     public void saveOrModifyTextMessage(MessageRecord messageRecord) {
-        DataMessage dataMessage = prepareDataMessage(messageRecord);
+        DataMessage dataMessage = findOrCreateDataMessage(messageRecord);
         dataMessage.setMessageText(messageRecord.getMessage().getText());
         log.debug("\n Message: " + dataMessage);
         dataMessageDAO.save(dataMessage);
@@ -119,7 +119,7 @@ public class MainServiceImpl implements MainService {
     @Override
     public void saveOrModifyDocument(MessageRecord messageRecord) {
         Document doc = fileService.processDoc(messageRecord.getMessage());
-        DataMessage dataMessage = prepareDataMessage(messageRecord);
+        DataMessage dataMessage = findOrCreateDataMessage(messageRecord);
         dataMessage.setDoc(doc);
         if (doc != null) {
             dataMessageDAO.save(dataMessage);
@@ -134,7 +134,7 @@ public class MainServiceImpl implements MainService {
     @Override
     public void saveOrModifyPhoto(MessageRecord messageRecord) {
         Photo photo = fileService.processPhoto(messageRecord.getMessage());
-        DataMessage dataMessage = prepareDataMessage(messageRecord);
+        DataMessage dataMessage = findOrCreateDataMessage(messageRecord);
         dataMessage.setPhoto(photo);
         if (photo != null) {
             dataMessageDAO.save(dataMessage);
