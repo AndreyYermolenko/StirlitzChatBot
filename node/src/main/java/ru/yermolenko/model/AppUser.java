@@ -12,16 +12,16 @@ import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(	name = "usr",
-		uniqueConstraints = { 
-			@UniqueConstraint(columnNames = "username"),
-			@UniqueConstraint(columnNames = "email") 
-		})
 @Data
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@Entity
+@Table(	name = "app_users",
+		uniqueConstraints = {
+				@UniqueConstraint(columnNames = "username"),
+				@UniqueConstraint(columnNames = "email")
+		})
 public class AppUser {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
