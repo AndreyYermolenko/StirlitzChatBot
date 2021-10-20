@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.dao.RawDataDAO;
 import ru.yermolenko.dao.ServiceUserDAO;
-import ru.yermolenko.dao.UserApiKeyDAO;
+import ru.yermolenko.dao.ApiKeyDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.request.TextMessageRequest;
@@ -28,11 +28,11 @@ public class MainServiceImpl implements MainService {
     private final ProducerService producerService;
     private final CollatzService collatzService;
     private final FileService fileService;
-    private final UserApiKeyDAO userApiKeyDAO;
+    private final ApiKeyDAO apiKeyDAO;
 
     public MainServiceImpl(ServiceUserDAO serviceUserDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
                            BotService botService, ProducerService producerService,
-                           CollatzService collatzService, FileService fileService, UserApiKeyDAO userApiKeyDAO) {
+                           CollatzService collatzService, FileService fileService, ApiKeyDAO apiKeyDAO) {
         this.serviceUserDAO = serviceUserDAO;
         this.dataMessageDAO = dataMessageDAO;
         this.rawDataDAO = rawDataDAO;
@@ -40,7 +40,7 @@ public class MainServiceImpl implements MainService {
         this.producerService = producerService;
         this.collatzService = collatzService;
         this.fileService = fileService;
-        this.userApiKeyDAO = userApiKeyDAO;
+        this.apiKeyDAO = apiKeyDAO;
     }
 
     @Override
@@ -102,17 +102,17 @@ public class MainServiceImpl implements MainService {
     }
 
     private String getOrGenerateApiKey(DataMessage dataMessage) {
-        Optional<UserApiKey> userApiKey = userApiKeyDAO.findByServiceUser(dataMessage.getServiceUser());
+        Optional<ApiKey> userApiKey = apiKeyDAO.findByServiceUser(dataMessage.getServiceUser());
         String apiKey;
         if (userApiKey.isPresent()) {
             apiKey = userApiKey.get().getApiKey();
         } else {
             apiKey = UUID.randomUUID().toString();
-            UserApiKey newUserApiKey = UserApiKey.builder()
+            ApiKey newApiKey = ApiKey.builder()
                     .serviceUser(dataMessage.getServiceUser())
                     .apiKey(apiKey)
                     .build();
-            userApiKeyDAO.save(newUserApiKey);
+            apiKeyDAO.save(newApiKey);
         }
         return "Your api key: " + apiKey;
     }
@@ -149,7 +149,7 @@ public class MainServiceImpl implements MainService {
 
     @Override
     public MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest) {
-        Optional<UserApiKey> optUserApiKey = userApiKeyDAO.findByApiKey(
+        Optional<ApiKey> optUserApiKey = apiKeyDAO.findByApiKey(
                 messageHistoryRequest.getUserApiKey());
         if (optUserApiKey.isEmpty()) {
             return MessageHistoryResponse.builder()

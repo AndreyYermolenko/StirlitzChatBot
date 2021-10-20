@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yermolenko.dao.RefreshTokenDAO;
-import ru.yermolenko.dao.UserDAO;
+import ru.yermolenko.dao.AppUserDAO;
 import ru.yermolenko.exception.TokenRefreshException;
 import ru.yermolenko.model.RefreshToken;
 
@@ -18,10 +18,10 @@ public class RefreshTokenService {
     private Long refreshTokenDurationMs;
 
     private final RefreshTokenDAO refreshTokenDAO;
-    private final UserDAO userDAO;
+    private final AppUserDAO appUserDAO;
 
-    public RefreshTokenService(UserDAO userDAO, RefreshTokenDAO refreshTokenDAO) {
-        this.userDAO = userDAO;
+    public RefreshTokenService(AppUserDAO appUserDAO, RefreshTokenDAO refreshTokenDAO) {
+        this.appUserDAO = appUserDAO;
         this.refreshTokenDAO = refreshTokenDAO;
     }
 
@@ -32,7 +32,7 @@ public class RefreshTokenService {
     public RefreshToken createRefreshToken(Long userId) {
         RefreshToken refreshToken = new RefreshToken();
 
-        refreshToken.setUser(userDAO.findById(userId).get());
+        refreshToken.setUser(appUserDAO.findById(userId).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
@@ -52,11 +52,11 @@ public class RefreshTokenService {
 
     @Transactional
     public int deleteByUsername(String username) {
-        return refreshTokenDAO.deleteByUser(userDAO.findByUsername(username).get());
+        return refreshTokenDAO.deleteByUser(appUserDAO.findByUsername(username).get());
     }
 
     @Transactional
     public int deleteByUserId(Long id) {
-        return refreshTokenDAO.deleteByUser(userDAO.findById(id).get());
+        return refreshTokenDAO.deleteByUser(appUserDAO.findById(id).get());
     }
 }

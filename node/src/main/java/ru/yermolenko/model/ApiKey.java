@@ -12,8 +12,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table
-public class UserApiKey {
+@Table(name = "api_keys")
+public class ApiKey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

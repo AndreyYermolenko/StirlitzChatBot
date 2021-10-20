@@ -5,23 +5,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yermolenko.dao.UserDAO;
-import ru.yermolenko.model.User;
+import ru.yermolenko.dao.AppUserDAO;
+import ru.yermolenko.model.AppUser;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final UserDAO userDAO;
+    private final AppUserDAO appUserDAO;
 
-    public UserDetailsServiceImpl(UserDAO userDAO) {
-        this.userDAO = userDAO;
+    public UserDetailsServiceImpl(AppUserDAO appUserDAO) {
+        this.appUserDAO = appUserDAO;
     }
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userDAO.findByUsername(username).stream().filter(User::getIsActive).findFirst()
+        AppUser appUser = appUserDAO.findByUsername(username).stream().filter(AppUser::getIsActive).findFirst()
           .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
-        return UserDetailsImpl.build(user);
+        return UserDetailsImpl.build(appUser);
     }
 }

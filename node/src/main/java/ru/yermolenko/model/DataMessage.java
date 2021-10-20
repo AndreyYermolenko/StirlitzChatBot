@@ -11,12 +11,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "data_messages")
 public class DataMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

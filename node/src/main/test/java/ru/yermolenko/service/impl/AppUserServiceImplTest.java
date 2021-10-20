@@ -8,14 +8,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yermolenko.dao.RoleDAO;
-import ru.yermolenko.dao.UserDAO;
+import ru.yermolenko.dao.AppUserDAO;
+import ru.yermolenko.model.AppUser;
 import ru.yermolenko.model.ERole;
 import ru.yermolenko.model.Role;
-import ru.yermolenko.model.User;
 import ru.yermolenko.payload.request.SignupRequest;
 import ru.yermolenko.payload.response.MessageResponse;
 import ru.yermolenko.service.MailSenderService;
-import ru.yermolenko.service.UserService;
+import ru.yermolenko.service.AppUserService;
 
 import java.util.Optional;
 import java.util.Set;
@@ -25,9 +25,9 @@ import static org.mockito.ArgumentMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class UserServiceImplTest {
+class AppUserServiceImplTest {
     @Autowired
-    private UserService userService;
+    private AppUserService appUserService;
     @MockBean
     private PasswordEncoder passwordEncoder;
     @MockBean
@@ -35,7 +35,7 @@ class UserServiceImplTest {
     @MockBean
     private RoleDAO roleDAO;
     @MockBean
-    private UserDAO userDAO;
+    private AppUserDAO appUserDAO;
 
     /**
      * Successful test variation when user and admin roles are present in SignupRequest.
@@ -63,13 +63,13 @@ class UserServiceImplTest {
                 .encode(sr.getPassword());
 
         Mockito.doReturn(Optional.ofNullable(null))
-                .when(userDAO)
+                .when(appUserDAO)
                 .findByUsername(sr.getUsername());
         Mockito.doReturn(Optional.ofNullable(null))
-                .when(userDAO)
+                .when(appUserDAO)
                 .findByEmail(sr.getEmail());
 
-        User user = User.builder()
+        AppUser user = AppUser.builder()
                 .username(sr.getUsername())
                 .email(sr.getEmail())
                 .password(passwordEncoder.encode(sr.getPassword()))
@@ -77,7 +77,7 @@ class UserServiceImplTest {
                 .roles(Set.of(new Role[]{ROLE_USER, ROLE_ADMIN}))
                 .build();
 
-        User persistentUser = User.builder()
+        AppUser persistentAppUser = AppUser.builder()
                 .id(1L)
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -86,15 +86,15 @@ class UserServiceImplTest {
                 .roles(user.getRoles())
                 .build();
 
-        Mockito.doReturn(persistentUser)
-                .when(userDAO)
+        Mockito.doReturn(persistentAppUser)
+                .when(appUserDAO)
                 .save(user);
 
-        MessageResponse messageResponse = userService.registerUser(sr);
+        MessageResponse messageResponse = appUserService.registerUser(sr);
 
         assertFalse(messageResponse.hasError());
         Mockito.verify(mailSenderService, Mockito.times(1))
-                .send(eq(persistentUser.getEmail()), eq(("Activation")), anyString());
+                .send(eq(persistentAppUser.getEmail()), eq(("Activation")), anyString());
     }
 
     /**
@@ -118,13 +118,13 @@ class UserServiceImplTest {
                 .encode(sr.getPassword());
 
         Mockito.doReturn(Optional.ofNullable(null))
-                .when(userDAO)
+                .when(appUserDAO)
                 .findByUsername(sr.getUsername());
         Mockito.doReturn(Optional.ofNullable(null))
-                .when(userDAO)
+                .when(appUserDAO)
                 .findByEmail(sr.getEmail());
 
-        User user = User.builder()
+        AppUser user = AppUser.builder()
                 .username(sr.getUsername())
                 .email(sr.getEmail())
                 .password(passwordEncoder.encode(sr.getPassword()))
@@ -132,7 +132,7 @@ class UserServiceImplTest {
                 .roles(Set.of(new Role[]{ROLE_USER}))
                 .build();
 
-        User persistentUser = User.builder()
+        AppUser persistentAppUser = AppUser.builder()
                 .id(1L)
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -141,15 +141,15 @@ class UserServiceImplTest {
                 .roles(user.getRoles())
                 .build();
 
-        Mockito.doReturn(persistentUser)
-                .when(userDAO)
+        Mockito.doReturn(persistentAppUser)
+                .when(appUserDAO)
                 .save(user);
 
-        MessageResponse messageResponse = userService.registerUser(sr);
+        MessageResponse messageResponse = appUserService.registerUser(sr);
 
         assertFalse(messageResponse.hasError());
         Mockito.verify(mailSenderService, Mockito.times(1))
-                .send(eq(persistentUser.getEmail()), eq(("Activation")), anyString());
+                .send(eq(persistentAppUser.getEmail()), eq(("Activation")), anyString());
     }
 
     /**
@@ -164,14 +164,14 @@ class UserServiceImplTest {
                 .password("p@ssw0rd")
                 .build();
 
-        Mockito.doReturn(Optional.of(User.builder().isActive(false).build()))
-                .when(userDAO)
+        Mockito.doReturn(Optional.of(AppUser.builder().isActive(false).build()))
+                .when(appUserDAO)
                 .findByUsername(sr.getUsername());
         Mockito.doReturn(Optional.ofNullable(null))
-                .when(userDAO)
+                .when(appUserDAO)
                 .findByEmail(sr.getEmail());
 
-        MessageResponse messageResponse = userService.registerUser(sr);
+        MessageResponse messageResponse = appUserService.registerUser(sr);
 
         String failedMessage = "Please check your email which you sent early for activation " +
                                 "else choose a new username with current email!";
@@ -192,11 +192,11 @@ class UserServiceImplTest {
                 .password("p@ssw0rd")
                 .build();
 
-        Mockito.doReturn(Optional.of(User.builder().isActive(true).build()))
-                .when(userDAO)
+        Mockito.doReturn(Optional.of(AppUser.builder().isActive(true).build()))
+                .when(appUserDAO)
                 .findByUsername(sr.getUsername());
 
-        MessageResponse messageResponse = userService.registerUser(sr);
+        MessageResponse messageResponse = appUserService.registerUser(sr);
 
         String failedMessage = "Username is already taken!";
         assertEquals(failedMessage, messageResponse.getMessage());
@@ -216,11 +216,11 @@ class UserServiceImplTest {
                 .password("p@ssw0rd")
                 .build();
 
-        Mockito.doReturn(Optional.of(User.builder().isActive(true).build()))
-                .when(userDAO)
+        Mockito.doReturn(Optional.of(AppUser.builder().isActive(true).build()))
+                .when(appUserDAO)
                 .findByEmail(sr.getEmail());
 
-        MessageResponse messageResponse = userService.registerUser(sr);
+        MessageResponse messageResponse = appUserService.registerUser(sr);
 
         String failedMessage = "Email is already in use!";
         assertEquals(failedMessage, messageResponse.getMessage());

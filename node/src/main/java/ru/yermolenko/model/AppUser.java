@@ -22,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class User {
+public class AppUser {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -47,7 +47,7 @@ public class User {
 	private Set<Role> roles = new HashSet<>();
 	private Boolean isActive;
 
-	public User(String username, String email, String password) {
+	public AppUser(String username, String email, String password) {
 		this.username = username;
 		this.email = email;
 		this.password = password;

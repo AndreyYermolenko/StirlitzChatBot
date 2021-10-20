@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.dao.ServiceUserDAO;
-import ru.yermolenko.dao.UserApiKeyDAO;
+import ru.yermolenko.dao.ApiKeyDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
@@ -40,7 +40,7 @@ class MainServiceImplTest {
     @MockBean
     private CollatzService collatzService;
     @MockBean
-    private UserApiKeyDAO userApiKeyDAO;
+    private ApiKeyDAO apiKeyDAO;
     @MockBean
     private ServiceUserDAO serviceUserDAO;
     @MockBean
@@ -140,13 +140,13 @@ class MainServiceImplTest {
                 .save(transientServiceUser);
 
         Mockito.doReturn(Optional.of(
-                UserApiKey.builder()
+                ApiKey.builder()
                         .id(1L)
                         .apiKey(api_key)
                         .serviceUser(persistentServiceUser)
                         .build())
                 )
-                .when(userApiKeyDAO)
+                .when(apiKeyDAO)
                 .findByServiceUser(persistentServiceUser);
 
         mainService.saveOrModifyTextMessage(messageRecord);
@@ -159,10 +159,10 @@ class MainServiceImplTest {
                 .save(eq(transientServiceUser));
         Mockito.verify(collatzService, Mockito.times(0))
                 .processInput(anyString());
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .findByServiceUser(eq(persistentServiceUser));
-        Mockito.verify(userApiKeyDAO, Mockito.times(0))
-                .save(any(UserApiKey.class));
+        Mockito.verify(apiKeyDAO, Mockito.times(0))
+                .save(any(ApiKey.class));
         Mockito.verify(producerService, Mockito.times(1))
                 .produceAnswer(SendMessage.builder()
                         .chatId(message.getChatId().toString())
@@ -215,8 +215,8 @@ class MainServiceImplTest {
                 .save(transientServiceUser);
 
         Mockito.doReturn(null)
-                .when(userApiKeyDAO)
-                .save(UserApiKey.builder()
+                .when(apiKeyDAO)
+                .save(ApiKey.builder()
                         .serviceUser(persistentServiceUser)
                         .build());
 
@@ -230,10 +230,10 @@ class MainServiceImplTest {
                 .save(eq(transientServiceUser));
         Mockito.verify(collatzService, Mockito.times(0))
                 .processInput(anyString());
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .findByServiceUser(eq(persistentServiceUser));
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
-                .save(any(UserApiKey.class));
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
+                .save(any(ApiKey.class));
         Mockito.verify(producerService, Mockito.times(1))
                 .produceAnswer(any(SendMessage.class));
     }
@@ -281,10 +281,10 @@ class MainServiceImplTest {
                 .save(eq(transientServiceUser));
         Mockito.verify(collatzService, Mockito.times(0))
                 .processInput(anyString());
-        Mockito.verify(userApiKeyDAO, Mockito.times(0))
+        Mockito.verify(apiKeyDAO, Mockito.times(0))
                 .findByServiceUser(any(ServiceUser.class));
-        Mockito.verify(userApiKeyDAO, Mockito.times(0))
-                .save(any(UserApiKey.class));
+        Mockito.verify(apiKeyDAO, Mockito.times(0))
+                .save(any(ApiKey.class));
         Mockito.verify(producerService, Mockito.times(1))
                 .produceAnswer(SendMessage.builder()
                         .chatId(message.getChatId().toString())
@@ -310,13 +310,13 @@ class MainServiceImplTest {
                 .build();
 
         Mockito.doReturn(Optional.empty())
-                .when(userApiKeyDAO)
+                .when(apiKeyDAO)
                 .findByApiKey(api_key);
 
         MessageHistoryResponse response = mainService.getLastMessages(request);
         assertEquals(expectedResponse, response);
 
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .findByApiKey(eq(api_key));
     }
 
@@ -337,8 +337,8 @@ class MainServiceImplTest {
                 .errorMessage("Messages aren't found!")
                 .build();
 
-        Mockito.doReturn(Optional.of(new UserApiKey()))
-                .when(userApiKeyDAO)
+        Mockito.doReturn(Optional.of(new ApiKey()))
+                .when(apiKeyDAO)
                 .findByApiKey(api_key);
         Mockito.doReturn(Optional.empty())
                 .when(dataMessageDAO)
@@ -347,7 +347,7 @@ class MainServiceImplTest {
         MessageHistoryResponse response = mainService.getLastMessages(request);
         assertEquals(expectedResponse, response);
 
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .findByApiKey(eq(api_key));
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .findLastMessagesByChatId(request.getChatId(), request.getLimit());
@@ -386,12 +386,12 @@ class MainServiceImplTest {
                 .build();
         List<DataMessage> dataMessages = Arrays.asList(message1, message2);
 
-        Mockito.doReturn(Optional.of(UserApiKey.builder()
+        Mockito.doReturn(Optional.of(ApiKey.builder()
                         .id(1L)
                         .apiKey(api_key)
                         .serviceUser(persistentServiceUser)
                         .build()))
-                .when(userApiKeyDAO)
+                .when(apiKeyDAO)
                 .findByApiKey(api_key);
         Mockito.doReturn(Optional.of(dataMessages))
                 .when(dataMessageDAO)
@@ -400,7 +400,7 @@ class MainServiceImplTest {
         MessageHistoryResponse response = mainService.getLastMessages(request);
         assertEquals(expectedResponse, response);
 
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .findByApiKey(eq(api_key));
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .findLastMessagesByChatId(request.getChatId(), request.getLimit());
@@ -438,12 +438,12 @@ class MainServiceImplTest {
                 .messages(dataMessages)
                 .build();
 
-        Mockito.doReturn(Optional.of(UserApiKey.builder()
+        Mockito.doReturn(Optional.of(ApiKey.builder()
                         .id(1L)
                         .apiKey(api_key)
                         .serviceUser(persistentServiceUser)
                         .build()))
-                .when(userApiKeyDAO)
+                .when(apiKeyDAO)
                 .findByApiKey(api_key);
         Mockito.doReturn(Optional.of(dataMessages))
                 .when(dataMessageDAO)
@@ -452,7 +452,7 @@ class MainServiceImplTest {
         MessageHistoryResponse response = mainService.getLastMessages(request);
         assertEquals(expectedResponse, response);
 
-        Mockito.verify(userApiKeyDAO, Mockito.times(1))
+        Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .findByApiKey(eq(api_key));
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .findLastMessagesByChatId(request.getChatId(), request.getLimit());

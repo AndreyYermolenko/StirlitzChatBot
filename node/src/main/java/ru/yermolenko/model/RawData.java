@@ -8,12 +8,12 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
-@Entity
-@Table
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "raw_data")
 public class RawData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

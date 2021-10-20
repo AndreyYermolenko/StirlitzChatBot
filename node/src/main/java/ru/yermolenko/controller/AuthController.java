@@ -20,7 +20,7 @@ import ru.yermolenko.payload.response.TokenRefreshResponse;
 import ru.yermolenko.security.jwt.JwtUtils;
 import ru.yermolenko.security.services.RefreshTokenService;
 import ru.yermolenko.security.services.UserDetailsImpl;
-import ru.yermolenko.service.UserService;
+import ru.yermolenko.service.AppUserService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -33,18 +33,18 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
-    private final UserService userService;
+    private final AppUserService appUserService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, RefreshTokenService refreshTokenService, UserService userService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, RefreshTokenService refreshTokenService, AppUserService appUserService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
-        this.userService = userService;
+        this.appUserService = appUserService;
     }
 
     @PostMapping("/sign_up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        MessageResponse messageResponse = userService.registerUser(signUpRequest);
+        MessageResponse messageResponse = appUserService.registerUser(signUpRequest);
         log.debug(messageResponse);
 
         if (messageResponse.hasError()) {
@@ -56,7 +56,7 @@ public class AuthController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/confirm")
     public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {
-        MessageResponse messageResponse = userService.confirmRegistration(id);
+        MessageResponse messageResponse = appUserService.confirmRegistration(id);
         if (messageResponse.hasError()) {
             return ResponseEntity.badRequest().body(messageResponse.getMessage());
         } else {

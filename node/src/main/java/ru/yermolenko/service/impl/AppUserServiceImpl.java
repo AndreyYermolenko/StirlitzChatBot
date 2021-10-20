@@ -5,14 +5,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.yermolenko.dao.RoleDAO;
-import ru.yermolenko.dao.UserDAO;
+import ru.yermolenko.dao.AppUserDAO;
+import ru.yermolenko.model.AppUser;
 import ru.yermolenko.model.ERole;
 import ru.yermolenko.model.Role;
-import ru.yermolenko.model.User;
 import ru.yermolenko.payload.request.SignupRequest;
 import ru.yermolenko.payload.response.MessageResponse;
 import ru.yermolenko.service.MailSenderService;
-import ru.yermolenko.service.UserService;
+import ru.yermolenko.service.AppUserService;
 import ru.yermolenko.tools.CryptoTool;
 
 import java.util.HashSet;
@@ -20,8 +20,8 @@ import java.util.Set;
 
 @Service
 @Log4j
-public class UserServiceImpl implements UserService {
-    private final UserDAO userDAO;
+public class AppUserServiceImpl implements AppUserService {
+    private final AppUserDAO appUserDAO;
     private final PasswordEncoder encoder;
     private final RoleDAO roleDAO;
     private final CryptoTool cryptoTool;
@@ -31,9 +31,9 @@ public class UserServiceImpl implements UserService {
     @Value("${server.port}")
     private String serverPort;
 
-    public UserServiceImpl(UserDAO userDAO, PasswordEncoder encoder, RoleDAO roleDAO,
-                           CryptoTool cryptoTool, MailSenderService mailSenderService) {
-        this.userDAO = userDAO;
+    public AppUserServiceImpl(AppUserDAO appUserDAO, PasswordEncoder encoder, RoleDAO roleDAO,
+                              CryptoTool cryptoTool, MailSenderService mailSenderService) {
+        this.appUserDAO = appUserDAO;
         this.encoder = encoder;
         this.roleDAO = roleDAO;
         this.cryptoTool = cryptoTool;
@@ -42,8 +42,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public MessageResponse registerUser(SignupRequest signUpRequest) {
-        User userByUsername = userDAO.findByUsername(signUpRequest.getUsername()).orElse(null);
-        User userByEmail = userDAO.findByEmail(signUpRequest.getEmail()).orElse(null);
+        AppUser userByUsername = appUserDAO.findByUsername(signUpRequest.getUsername()).orElse(null);
+        AppUser userByEmail = appUserDAO.findByEmail(signUpRequest.getEmail()).orElse(null);
         if (userByUsername != null && !userByUsername.getIsActive() && userByEmail == null) {
             return MessageResponse.builder()
                     .message("Please check your email which you sent early for activation " +
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+        AppUser user = new AppUser(signUpRequest.getUsername(), signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
         Set<String> rolesFromRequest = signUpRequest.getRole();
@@ -115,10 +115,10 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(roles);
         user.setIsActive(false);
-        User persistentUser = userDAO.save(user);
+        AppUser persistentAppUser = appUserDAO.save(user);
 
-        String message = createTextMessageForConfirmation(persistentUser.getId());
-        mailSenderService.send(persistentUser.getEmail(), "Activation", message);
+        String message = createTextMessageForConfirmation(persistentAppUser.getId());
+        mailSenderService.send(persistentAppUser.getEmail(), "Activation", message);
         return MessageResponse.builder()
                 .message("Please check your email and go to activate link!")
                 .error(false)
@@ -135,10 +135,10 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
-        User user = userDAO.findById(userId).orElse(null);
-        if (user != null) {
-            user.setIsActive(true);
-            userDAO.save(user);
+        AppUser appUser = appUserDAO.findById(userId).orElse(null);
+        if (appUser != null) {
+            appUser.setIsActive(true);
+            appUserDAO.save(appUser);
         }
         return MessageResponse.builder()
                 .message("User registered successfully!")

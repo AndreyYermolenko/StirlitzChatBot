@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table
+@Table(name = "bots")
 public class Bot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
