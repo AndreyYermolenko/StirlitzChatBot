@@ -58,9 +58,9 @@ public class AuthController {
     public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {
         MessageResponse messageResponse = appUserService.confirmRegistration(id);
         if (messageResponse.hasError()) {
-            return ResponseEntity.badRequest().body(messageResponse.getMessage());
+            return ResponseEntity.badRequest().body(messageResponse);
         } else {
-            return ResponseEntity.ok(messageResponse.getMessage());
+            return ResponseEntity.ok(messageResponse);
         }
     }
 

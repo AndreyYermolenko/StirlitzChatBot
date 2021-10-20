@@ -130,20 +130,29 @@ public class AppUserServiceImpl implements AppUserService {
         Long userId = cryptoTool.idOf(id);;
         if (userId == null) {
             return MessageResponse.builder()
-                    .message("User not found by this ID!")
+                    .message("Incorrect ID!")
                     .error(true)
                     .build();
         }
-
         AppUser appUser = appUserDAO.findById(userId).orElse(null);
-        if (appUser != null) {
+        if (appUser != null && appUser.getIsActive()) {
+            return MessageResponse.builder()
+                    .message("User is already activated!")
+                    .error(true)
+                    .build();
+        } else if (appUser != null && !appUser.getIsActive()) {
             appUser.setIsActive(true);
             appUserDAO.save(appUser);
+            return MessageResponse.builder()
+                    .message("User registered successfully!")
+                    .error(false)
+                    .build();
+        } else {
+            return MessageResponse.builder()
+                    .message("User not found!")
+                    .error(true)
+                    .build();
         }
-        return MessageResponse.builder()
-                .message("User registered successfully!")
-                .error(false)
-                .build();
     }
 
     private String createTextMessageForConfirmation(Long userId) {
