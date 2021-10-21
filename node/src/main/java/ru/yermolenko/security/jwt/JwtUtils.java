@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.yermolenko.payload.response.MessageResponse;
 import ru.yermolenko.security.services.UserDetailsImpl;
 
 import java.util.Date;
@@ -34,23 +35,31 @@ public class JwtUtils {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public MessageResponse validateJwtToken(String authToken) {
+        MessageResponse response = MessageResponse.builder().error(false).build();
+        String errorMessage = null;
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
-            return true;
+            return response;
         } catch (SignatureException e) {
-            logger.error("Invalid JWT signature: {}", e.getMessage());
+            errorMessage = "Invalid JWT signature";
+            logger.error(errorMessage + ": ", e.getMessage());
         } catch (MalformedJwtException e) {
-            logger.error("Invalid JWT token: {}", e.getMessage());
+            errorMessage = "Invalid JWT token";
+            logger.error(errorMessage + ": ", e.getMessage());
         } catch (ExpiredJwtException e) {
-            logger.error("JWT token is expired: {}", e.getMessage());
+            errorMessage = "JWT token is expired";
+            logger.error(errorMessage + ": ", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            logger.error("JWT token is unsupported: {}", e.getMessage());
+            errorMessage = "JWT token is unsupported";
+            logger.error(errorMessage + ": ", e.getMessage());
         } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty: {}", e.getMessage());
+            errorMessage = "JWT claims string is empty";
+            logger.error(errorMessage + ": ", e.getMessage());
         }
-
-        return false;
+        response.setMessage(errorMessage);
+        response.setError(true);
+        return response;
     }
 
 }
