@@ -76,7 +76,7 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
             userDetails.getUsername(), userDetails.getEmail(), roles));
@@ -88,12 +88,12 @@ public class AuthController {
 
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
-                    String token = jwtUtils.generateTokenFromUsername(user.getUsername());
-                    refreshTokenService.deleteByUserId(user.getId());
-                    RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
-                    return ResponseEntity.ok(new TokenRefreshResponse(token, newRefreshToken.getToken()));
+                .map(RefreshToken::getUsername)
+                .map(username -> {
+                    String accessToken = jwtUtils.generateTokenFromUsername(username);
+                    refreshTokenService.delete(request.getRefreshToken());
+                    RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(username);
+                    return ResponseEntity.ok(new TokenRefreshResponse(accessToken, newRefreshToken.getToken()));
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                     "Refresh token is not in database!"));
@@ -103,7 +103,7 @@ public class AuthController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        refreshTokenService.deleteByUsername(userDetails.getUsername());
+        refreshTokenService.delete(userDetails.getUsername());
         return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!").build());
     }
 }

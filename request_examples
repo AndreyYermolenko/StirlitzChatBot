@@ -72,14 +72,17 @@ curl -d '{"chatId": "594441532", "message":"Ku-ku"}' -H 'Authorization: Bearer e
 
 
 Регистрация:
-curl -d '{"username": "uzer1177","email": "lakorar402@settags.com", "password": "123456"}' http://10.10.0.162:8051/api/auth/sign_up
-curl -d '{"username": "odmen1177","email": "lakorar402@settags.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.0.162:8051/api/auth/sign_up
+curl -d '{"username": "uzer1177","email": "repixe9650@ateampc.com", "password": "123456"}' http://10.10.0.162:8051/api/auth/sign_up
+curl -d '{"username": "odmen1177","email": "repixe9650@ateampc.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.0.162:8051/api/auth/sign_up
 
 Авторизация:
 curl -d '{"username": "odmen1177","password": "123456"}' http://10.10.0.162:8051/api/auth/sign_in
 
+Получение новой пары токенов:
+curl -d '{"refreshToken": "09792947-6fa4-486d-98b7-2546caf88e2d"}' http://10.10.0.162:8051/api/auth/refresh_token
+
 Получить последние N сообщений
-curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1emVyMTE3NyIsImlhdCI6MTYzNDYyOTA1OCwiZXhwIjoxNjM0NjMyNjU4fQ.cOdFAq_4JP-T7vrbDb1w1mO-udj6dMfMo6M4HTjyxAED7nMUmQciqNdKDMjPM2nWPzneUinlqJoJatvZKzDOZA' http://10.10.0.162:8051/api/data/get_last_messages
+curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ4MjUwNTksImV4cCI6MTYzNDgyNTA4OX0.JnyqSnKCiTWcglEn7lzY3kcsYUDWV5JCy3BNFpRHkkexPAYrbVEBdjWx7fEjtbYnU-EzQpFeeY3qjpE0_9GlzQ' http://10.10.0.162:8051/api/data/get_last_messages
 
 Отправить сообщение от имени бота:
 curl -d '{"chatId": "333", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ2NDk4MjgsImV4cCI6MTYzNDY1MzQyOH0.B9zvlAQf05jnFbcEyZ5bahnNCCR73O5c91NNsQ5WWFmS1ZVSLeK_oNcDpzqvMC9PXl3H6ePli2FLLg4oT18oxw' http://10.10.0.162:8051/api/data/send_message

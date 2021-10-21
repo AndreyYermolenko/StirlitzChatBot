@@ -29,20 +29,20 @@ public class RefreshTokenService {
         return refreshTokenDAO.findByToken(token);
     }
 
-    public RefreshToken createRefreshToken(Long userId) {
+    public RefreshToken createRefreshToken(String username) {
         RefreshToken refreshToken = new RefreshToken();
 
-        refreshToken.setUser(appUserDAO.findById(userId).get());
+        refreshToken.setUsername(username);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
-        refreshToken = refreshTokenDAO.save(refreshToken);
+        refreshTokenDAO.save(refreshToken);
         return refreshToken;
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenDAO.delete(token);
+            refreshTokenDAO.delete(token.getToken());
             throw new TokenRefreshException(token.getToken(),
                     "Refresh token was expired. Please make a new signin request");
         }
@@ -51,12 +51,7 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public int deleteByUsername(String username) {
-        return refreshTokenDAO.deleteByUser(appUserDAO.findByUsername(username).get());
-    }
-
-    @Transactional
-    public int deleteByUserId(Long id) {
-        return refreshTokenDAO.deleteByUser(appUserDAO.findById(id).get());
+    public void delete(String token) {
+        refreshTokenDAO.delete(token);
     }
 }
