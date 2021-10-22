@@ -40,8 +40,7 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenDAO.deleteById(token.getToken());
-            throw new TokenRefreshException(token.getToken(),
-                    "Refresh token was expired. Please make a new signin request");
+            throw new TokenRefreshException("Refresh token was expired. Please make a new signin request");
         }
 
         return token;
@@ -50,5 +49,9 @@ public class RefreshTokenService {
     @Transactional
     public void deleteByToken(String token) {
         refreshTokenDAO.deleteById(token);
+    }
+
+    public Optional<RefreshToken> findByUsername(String username) {
+        return refreshTokenDAO.findByUsername(username);
     }
 }

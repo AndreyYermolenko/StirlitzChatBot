@@ -35,7 +35,8 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final AppUserService appUserService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, RefreshTokenService refreshTokenService, AppUserService appUserService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
+                          RefreshTokenService refreshTokenService, AppUserService appUserService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
@@ -95,15 +96,17 @@ public class AuthController {
                     RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(username);
                     return ResponseEntity.ok(new TokenRefreshResponse(accessToken, newRefreshToken.getToken()));
                 })
-                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
-                    "Refresh token is not in database!"));
+                .orElseThrow(() -> new TokenRefreshException("Refresh token is not in database!"));
     }
 
     @GetMapping("/logout")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        refreshTokenService.deleteByToken(userDetails.getUsername());
-        return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!").build());
+        return refreshTokenService.findByUsername(userDetails.getUsername())
+                .map(refreshToken -> {
+                    refreshTokenService.deleteByToken(refreshToken.getToken());
+                    return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!").build());
+                }).orElseThrow(() -> new TokenRefreshException("Log out already was done!"));
     }
 }
