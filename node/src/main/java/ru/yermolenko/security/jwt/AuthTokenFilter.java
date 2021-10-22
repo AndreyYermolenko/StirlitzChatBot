@@ -34,6 +34,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         try {
             String jwt = parseJwt(request);
             MessageResponse validationResult = jwtUtils.validateJwtToken(jwt);
+            // Case when jwt == null is authentication stage.
             if (jwt != null && !validationResult.hasError()) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
@@ -44,8 +45,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                filterChain.doFilter(request, response);
-            } else {
+            } else if (jwt != null && validationResult.hasError()) {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 ErrorMessage errorMessage = ErrorMessage.builder()
                         .statusCode(HttpStatus.FORBIDDEN.value())
@@ -54,11 +54,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                         .description("")
                         .build();
                 response.getWriter().write(new ObjectMapper().writeValueAsString(errorMessage));
+                return;
             }
         } catch (Exception e) {
             log.error("Cannot set user authentication: " +  e.getMessage());
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
     }
 
     private String parseJwt(HttpServletRequest request) {
