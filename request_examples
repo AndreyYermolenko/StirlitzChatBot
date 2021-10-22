@@ -45,26 +45,26 @@ INSERT INTO role(name) VALUES('ROLE_ADMIN');
 
 Регистрация:
 curl -d '{"username": "odmen1","email": "repixe9650@ateampc.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
-curl -d '{"username": "uzer1177","email": "repixe9650@ateampc.com", "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
+curl -d '{"username": "uzer777","email": "repixe9650@ateampc.com", "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
 
 Авторизация:
-curl -d '{"username": "odmen1177","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
+curl -d '{"username": "odmen1","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
 
 Получить последние N сообщений
-curl -d '{"userApiKey": "df92eb71-6baf-4cb5-b056-c79c0000f18d","chatId": "594441532", "limit":"5"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ3MTM4OTIsImV4cCI6MTYzNDcxNzQ5Mn0.tVM4hctwtoA2gb-YaJ_2TSfJN_KAoMhVZFg53soc0FFu-xFhhzSGNfm_QMIaGTHsy19ErakJDxp99ayMzwEnOQ' http://10.10.108.221:8051/api/data/get_last_messages
+curl -d '{"userApiKey": "e8d7c6ea-d127-42bc-b237-1a828cf9e4ae","chatId": "594441532", "limit":"5"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ4OTY5NTcsImV4cCI6MTYzNDg5NzI1N30.5QhQyggkf1PnBAIbfANOVqKKwzNhY9P5QjnZUAxJfhpOSQRHKkLh18eB9rmDHyucJKRba7tMoRrKAbb5LfMjQQ' http://10.10.108.221:8051/api/data/get_last_messages
 
 
 Получение новой пары токенов:
-curl -d '{"refreshToken": "025cc68e-7162-402b-90f0-d7a567605516"}' http://10.10.108.221:8051/api/auth/refresh_token
+curl -d '{"refreshToken": "fff29459-1526-4156-83c8-fa71a51a10bd"}' http://10.10.108.221:8051/api/auth/refresh_token
 
 Логаут:
-curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwiaWF0IjoxNjM0MjkwODI2LCJleHAiOjE2MzQyOTQ0MjZ9.MvFM8jHSIzpN3bHYHlCRI-XiRU_8Yx4RgRGM3C_KYMW7g85L6eIYgrUo_OmscReZiZQ_CeaF1cQhCNgpMjjuig' http://10.10.108.221:8051/api/auth/logout
+curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ4OTc4NDUsImV4cCI6MTYzNDg5ODE0NX0.Y-lmjXJdBkxjDT_mjJX_cRkc33RFRdUvxrmyoypQd1-fjcbUFkcNCs64lCKDDeHH6b7xNgf8C5ZaB5eyLn98mg' http://10.10.108.221:8051/api/auth/logout
 
 Получить все сообщения (только для админа):
 curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ4OTI4ODksImV4cCI6MTYzNDg5MjkxOX0.fLJXWM5s-OLjTQdAs4mzU_GYejBraTJbECHb0ZbFxegO8jM7EbVFXXyZWiCuGXwwnJXDNeRT4El0tkHx1-IfAg' http://10.10.108.221:8051/api/data/get_all_messages
 
 Отправить сообщение от имени бота (только для админа):
-curl -d '{"chatId": "594441532", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ3MTM4OTIsImV4cCI6MTYzNDcxNzQ5Mn0.tVM4hctwtoA2gb-YaJ_2TSfJN_KAoMhVZFg53soc0FFu-xFhhzSGNfm_QMIaGTHsy19ErakJDxp99ayMzwEnOQ' http://10.10.108.221:8051/api/data/send_message
+curl -d '{"chatId": "594441532", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ4OTc1OTUsImV4cCI6MTYzNDg5Nzg5NX0.MwHKouM6aRO7QN3vl0M80cXcTM85e_tPOsENvT2p-Ak-1I2X0wFYaCqzZKuiyooXpqOqwYTv8RNVoxMIzaookQ' http://10.10.108.221:8051/api/data/send_message
 
 
 
@@ -79,10 +79,13 @@ curl -d '{"username": "odmen1177","email": "repixe9650@ateampc.com", "role": [ "
 curl -d '{"username": "odmen1177","password": "123456"}' http://10.10.0.162:8051/api/auth/sign_in
 
 Получение новой пары токенов:
-curl -d '{"refreshToken": "4d4eacc0-2b4d-4822-ad33-9747545fbbc3"}' http://10.10.0.162:8051/api/auth/refresh_token
+curl -d '{"refreshToken": "568fb53b-c250-4181-ad12-e07d29cb6ddb"}' http://10.10.0.162:8051/api/auth/refresh_token
 
 Получить последние N сообщений
 curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ4OTI1MDgsImV4cCI6MTYzNDg5MjUzOH0.P6Od09e31lbDrlSHPErihMf--M247gg8QYuj0L5ZIMSwpZESC2ShOj1y4LILWeSLqpT4C2pDC3osokII9qmOwg' http://10.10.0.162:8051/api/data/get_last_messages
 
 Отправить сообщение от имени бота:
 curl -d '{"chatId": "333", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ2NDk4MjgsImV4cCI6MTYzNDY1MzQyOH0.B9zvlAQf05jnFbcEyZ5bahnNCCR73O5c91NNsQ5WWFmS1ZVSLeK_oNcDpzqvMC9PXl3H6ePli2FLLg4oT18oxw' http://10.10.0.162:8051/api/data/send_message
+
+Логаут:
+curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ5MDQ0MTMsImV4cCI6MTYzNDkwNDcxM30.Dab5hXgRcCHFvEbkl3gnvRhJxW4C6jmxj38_bsUQkvxnn9tguRua811zixWRtpdsO3Gu4o2RR12CsXVwe77L_Q' http://10.10.0.162:8051/api/auth/logout
