@@ -44,24 +44,24 @@ INSERT INTO role(name) VALUES('ROLE_ADMIN');
 
 
 Регистрация:
-curl -d '{"username": "odmen1","email": "lakorar402@settags.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
-curl -d '{"username": "uzer1","email": "lakorar402@settags.com", "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
+curl -d '{"username": "odmen1","email": "repixe9650@ateampc.com", "role": [ "user", "admin"], "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
+curl -d '{"username": "uzer1177","email": "repixe9650@ateampc.com", "password": "123456"}' http://10.10.108.221:8051/api/auth/sign_up
 
 Авторизация:
-curl -d '{"username": "odmen1","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
+curl -d '{"username": "odmen1177","password": "123456"}' http://10.10.108.221:8051/api/auth/sign_in
 
 Получить последние N сообщений
 curl -d '{"userApiKey": "df92eb71-6baf-4cb5-b056-c79c0000f18d","chatId": "594441532", "limit":"5"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ3MTM4OTIsImV4cCI6MTYzNDcxNzQ5Mn0.tVM4hctwtoA2gb-YaJ_2TSfJN_KAoMhVZFg53soc0FFu-xFhhzSGNfm_QMIaGTHsy19ErakJDxp99ayMzwEnOQ' http://10.10.108.221:8051/api/data/get_last_messages
 
 
 Получение новой пары токенов:
-curl -d '{"refreshToken": "c1f3d644-7a5d-46f2-9454-dff827ae3c8b"}' http://10.10.108.221:8051/api/auth/refresh_token
+curl -d '{"refreshToken": "025cc68e-7162-402b-90f0-d7a567605516"}' http://10.10.108.221:8051/api/auth/refresh_token
 
 Логаут:
 curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3Nzc3N29kbWVuIiwiaWF0IjoxNjM0MjkwODI2LCJleHAiOjE2MzQyOTQ0MjZ9.MvFM8jHSIzpN3bHYHlCRI-XiRU_8Yx4RgRGM3C_KYMW7g85L6eIYgrUo_OmscReZiZQ_CeaF1cQhCNgpMjjuig' http://10.10.108.221:8051/api/auth/logout
 
 Получить все сообщения (только для админа):
-curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ1NDAwMjksImV4cCI6MTYzNDU0MzYyOX0.2Q3GrHrIzrEZbZ032zxUFWEbIIMkCO83QkpnvoyGoz_jjhhaKpfx_Bm1xQxMd_XL0qOW5-Xn10VzYYOEgXKrLw' http://10.10.108.221:8051/api/data/get_all_messages
+curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ4OTI4ODksImV4cCI6MTYzNDg5MjkxOX0.fLJXWM5s-OLjTQdAs4mzU_GYejBraTJbECHb0ZbFxegO8jM7EbVFXXyZWiCuGXwwnJXDNeRT4El0tkHx1-IfAg' http://10.10.108.221:8051/api/data/get_all_messages
 
 Отправить сообщение от имени бота (только для админа):
 curl -d '{"chatId": "594441532", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjEiLCJpYXQiOjE2MzQ3MTM4OTIsImV4cCI6MTYzNDcxNzQ5Mn0.tVM4hctwtoA2gb-YaJ_2TSfJN_KAoMhVZFg53soc0FFu-xFhhzSGNfm_QMIaGTHsy19ErakJDxp99ayMzwEnOQ' http://10.10.108.221:8051/api/data/send_message
@@ -79,11 +79,10 @@ curl -d '{"username": "odmen1177","email": "repixe9650@ateampc.com", "role": [ "
 curl -d '{"username": "odmen1177","password": "123456"}' http://10.10.0.162:8051/api/auth/sign_in
 
 Получение новой пары токенов:
-curl -d '{"refreshToken": "09792947-6fa4-486d-98b7-2546caf88e2d"}' http://10.10.0.162:8051/api/auth/refresh_token
+curl -d '{"refreshToken": "4d4eacc0-2b4d-4822-ad33-9747545fbbc3"}' http://10.10.0.162:8051/api/auth/refresh_token
 
 Получить последние N сообщений
-curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ4MjUwNTksImV4cCI6MTYzNDgyNTA4OX0.JnyqSnKCiTWcglEn7lzY3kcsYUDWV5JCy3BNFpRHkkexPAYrbVEBdjWx7fEjtbYnU-EzQpFeeY3qjpE0_9GlzQ' http://10.10.0.162:8051/api/data/get_last_messages
+curl -d '{"userApiKey": "xxx222","chatId": "333", "limit":"3"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ4OTI1MDgsImV4cCI6MTYzNDg5MjUzOH0.P6Od09e31lbDrlSHPErihMf--M247gg8QYuj0L5ZIMSwpZESC2ShOj1y4LILWeSLqpT4C2pDC3osokII9qmOwg' http://10.10.0.162:8051/api/data/get_last_messages
 
 Отправить сообщение от имени бота:
 curl -d '{"chatId": "333", "message":"Ku-ku"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvZG1lbjExNzciLCJpYXQiOjE2MzQ2NDk4MjgsImV4cCI6MTYzNDY1MzQyOH0.B9zvlAQf05jnFbcEyZ5bahnNCCR73O5c91NNsQ5WWFmS1ZVSLeK_oNcDpzqvMC9PXl3H6ePli2FLLg4oT18oxw' http://10.10.0.162:8051/api/data/send_message
-

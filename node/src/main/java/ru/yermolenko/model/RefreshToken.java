@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -12,8 +14,10 @@ import java.time.Instant;
 @AllArgsConstructor
 @Data
 @Builder
+@RedisHash("refresh_tokens")
 public class RefreshToken implements Serializable {
-    private String username;
+    @Id
     private String token;
+    private String username;
     private Instant expiryDate;
 }

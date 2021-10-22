@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yermolenko.dao.RefreshTokenDAO;
-import ru.yermolenko.dao.AppUserDAO;
 import ru.yermolenko.exception.TokenRefreshException;
 import ru.yermolenko.model.RefreshToken;
 
@@ -18,15 +17,13 @@ public class RefreshTokenService {
     private Long refreshTokenDurationMs;
 
     private final RefreshTokenDAO refreshTokenDAO;
-    private final AppUserDAO appUserDAO;
 
-    public RefreshTokenService(AppUserDAO appUserDAO, RefreshTokenDAO refreshTokenDAO) {
-        this.appUserDAO = appUserDAO;
+    public RefreshTokenService(RefreshTokenDAO refreshTokenDAO) {
         this.refreshTokenDAO = refreshTokenDAO;
     }
 
     public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenDAO.findByToken(token);
+        return refreshTokenDAO.findById(token);
     }
 
     public RefreshToken createRefreshToken(String username) {
@@ -42,7 +39,7 @@ public class RefreshTokenService {
 
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenDAO.delete(token.getToken());
+            refreshTokenDAO.deleteById(token.getToken());
             throw new TokenRefreshException(token.getToken(),
                     "Refresh token was expired. Please make a new signin request");
         }
@@ -51,7 +48,7 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void delete(String token) {
-        refreshTokenDAO.delete(token);
+    public void deleteByToken(String token) {
+        refreshTokenDAO.deleteById(token);
     }
 }

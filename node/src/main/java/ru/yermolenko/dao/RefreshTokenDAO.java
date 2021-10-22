@@ -1,11 +1,11 @@
 package ru.yermolenko.dao;
 
+import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import ru.yermolenko.model.RefreshToken;
 
 import java.util.Optional;
 
-public interface RefreshTokenDAO {
-  void save(RefreshToken refreshToken);
-  Optional<RefreshToken> findByToken(String token);
-  void delete(String token);
+public interface RefreshTokenDAO extends KeyValueRepository<RefreshToken, String> {
+    Optional<RefreshToken> findById(String id);
+    void deleteById(String id);
 }

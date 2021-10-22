@@ -43,7 +43,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null,
                         userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else if (jwt != null && validationResult.hasError()) {
                 response.setStatus(HttpStatus.FORBIDDEN.value());

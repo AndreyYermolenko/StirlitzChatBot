@@ -91,7 +91,7 @@ public class AuthController {
                 .map(RefreshToken::getUsername)
                 .map(username -> {
                     String accessToken = jwtUtils.generateTokenFromUsername(username);
-                    refreshTokenService.delete(request.getRefreshToken());
+                    refreshTokenService.deleteByToken(request.getRefreshToken());
                     RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(username);
                     return ResponseEntity.ok(new TokenRefreshResponse(accessToken, newRefreshToken.getToken()));
                 })
@@ -103,7 +103,7 @@ public class AuthController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        refreshTokenService.delete(userDetails.getUsername());
+        refreshTokenService.deleteByToken(userDetails.getUsername());
         return ResponseEntity.ok(MessageResponse.builder().message("Log out successful!").build());
     }
 }
