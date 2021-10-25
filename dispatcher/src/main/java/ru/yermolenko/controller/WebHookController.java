@@ -26,15 +26,14 @@ public class WebHookController {
 
         boolean devProfile = Arrays.asList(env.getActiveProfiles()).contains("dev");
         log.debug("dev profile is activated: " + devProfile);
-        if (devProfile) {
-            SetWebhook setWebhook = SetWebhook.builder()
+//        if (devProfile) {
+        SetWebhook setWebhook = SetWebhook.builder()
                     .url(dispatcherBot.getBotPath())
                     .build();
-            try {
-                dispatcherBot.setWebhook(setWebhook);
-            } catch (TelegramApiException e) {
-                log.error(e);
-            }
+        try {
+            dispatcherBot.setWebhook(setWebhook);
+        } catch (TelegramApiException e) {
+            log.error(e);
         }
     }
 

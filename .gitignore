@@ -12,6 +12,10 @@ dispatcher/src/main/resources/myPem.pem
 dispatcher/src/main/resources/myPkcs.p12
 dispatcher/src/main/resources/application.properties
 dispatcher/src/main/resources/application-dev.properties
+dispatcher/dispatcher.iml
 
 node/src/main/resources/application.properties
 node/src/main/resources/application-dev.properties
+node/node.iml
+
+stirlitz-bot.iml
