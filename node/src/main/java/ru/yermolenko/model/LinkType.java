@@ -1,8 +1,8 @@
 package ru.yermolenko.model;
 
 public enum LinkType {
-    GET_DOC("get_doc"),
-    GET_PHOTO("get_photo");
+    GET_DOC("api/file/get_doc"),
+    GET_PHOTO("api/file/get_photo");
     private final String link;
 
     LinkType(String link) {
