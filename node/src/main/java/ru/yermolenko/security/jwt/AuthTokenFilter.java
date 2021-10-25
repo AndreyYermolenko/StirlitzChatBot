@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Set;
 
 @Log4j
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -27,6 +28,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    private final Set<String> REQUESTS_WITHOUT_ACCESS_TOKEN = Set.of(
+            "/api/auth/sign_up",
+            "/api/auth/confirm",
+            "/api/auth/sign_in",
+            "/api/auth/refresh_token"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -69,5 +76,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
+            throws ServletException {
+        String path = request.getRequestURI();
+        return REQUESTS_WITHOUT_ACCESS_TOKEN.contains(path);
     }
 }
