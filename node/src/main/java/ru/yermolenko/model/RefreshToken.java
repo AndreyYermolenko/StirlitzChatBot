@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
+import ru.yermolenko.tools.Constants;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -16,7 +18,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Data
 @Builder
-@RedisHash("refresh_tokens")
+@RedisHash(value = "refresh_tokens")
 public class RefreshToken implements Serializable {
     @Id
     @Unique
@@ -25,4 +27,6 @@ public class RefreshToken implements Serializable {
     @Unique
     private String username;
     private Instant expiryDate;
+    @TimeToLive
+    private long timeToLive = Constants.getTimeToLive();
 }
