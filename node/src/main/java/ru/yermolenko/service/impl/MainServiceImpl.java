@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.dao.RawDataDAO;
-import ru.yermolenko.dao.ServiceUserDAO;
+import ru.yermolenko.dao.AppUserDAO;
 import ru.yermolenko.dao.ApiKeyDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
@@ -18,10 +18,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static ru.yermolenko.model.ServiceCommand.GET_API_KEY;
+import static ru.yermolenko.model.ServiceCommand.GET_CHAT_ID;
+import static ru.yermolenko.model.UserState.*;
+
 @Log4j
 @Service
 public class MainServiceImpl implements MainService {
-    private final ServiceUserDAO serviceUserDAO;
+    private final AppUserDAO appUserDAO;
     private final DataMessageDAO dataMessageDAO;
     private final RawDataDAO rawDataDAO;
     private final BotService botService;
@@ -30,10 +34,10 @@ public class MainServiceImpl implements MainService {
     private final FileService fileService;
     private final ApiKeyDAO apiKeyDAO;
 
-    public MainServiceImpl(ServiceUserDAO serviceUserDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
+    public MainServiceImpl(AppUserDAO appUserDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
                            BotService botService, ProducerService producerService,
                            CollatzService collatzService, FileService fileService, ApiKeyDAO apiKeyDAO) {
-        this.serviceUserDAO = serviceUserDAO;
+        this.appUserDAO = appUserDAO;
         this.dataMessageDAO = dataMessageDAO;
         this.rawDataDAO = rawDataDAO;
         this.botService = botService;
@@ -44,16 +48,18 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public ServiceUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser) {
-        ServiceUser persistentServiceUser = serviceUserDAO.findUserByExternalServiceId(externalServiceUser.getId());
+    public AppUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser) {
+        AppUser persistentServiceUser = appUserDAO.findUserByExternalServiceId(externalServiceUser.getId());
         if (persistentServiceUser == null) {
-            ServiceUser transientServiceUser = ServiceUser.builder()
+            AppUser transientAppUser = AppUser.builder()
                     .externalServiceId(externalServiceUser.getId())
                     .username(externalServiceUser.getUserName())
                     .firstName(externalServiceUser.getFirstName())
                     .lastName(externalServiceUser.getLastName())
+                    .isActive(false)
+                    .state(BASIC)
                     .build();
-            return serviceUserDAO.save(transientServiceUser);
+            return appUserDAO.save(transientAppUser);
         }
         return persistentServiceUser;
     }
@@ -63,10 +69,10 @@ public class MainServiceImpl implements MainService {
         DataMessage persistentDataMessage = dataMessageDAO.findMessageByExternalServiceId(
                 message.getMessageId());
         if (persistentDataMessage == null) {
-            ServiceUser persistentServiceUser = findOrSaveUser(messageRecord.getMessage().getFrom());
+            AppUser persistentAppUser = findOrSaveUser(messageRecord.getMessage().getFrom());
             return DataMessage.builder()
                     .externalServiceId(message.getMessageId())
-                    .serviceUser(persistentServiceUser)
+                    .appUser(persistentAppUser)
                     .chatId(message.getChatId())
                     .chatType(ChatType.valueOf(message.getChat().getType().toUpperCase()))
                     .unixTimeFromExternalService(message.getDate())
@@ -78,25 +84,56 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public void saveOrModifyTextMessage(MessageRecord messageRecord) {
-        DataMessage dataMessage = findOrCreateDataMessage(messageRecord);
-        dataMessage.setMessageText(messageRecord.getMessage().getText());
-        log.debug("\n Message: " + dataMessage);
-        dataMessageDAO.save(dataMessage);
+    public void processTextMessage(MessageRecord messageRecord) {
+        DataMessage dataMessage = saveOrModifyTextMessage(messageRecord);
         String output;
-        if (dataMessage.getMessageText() != null
-                && dataMessage.getMessageText().startsWith("/")) {
+        UserState state = dataMessage.getAppUser().getState();
+
+        log.debug("State : " + state);
+        log.debug("isActive : " + dataMessage.getAppUser().getIsActive());
+
+        if (WAIT_FOR_EMAIL.equals(state)) {
+            output = handleWaitForEmailState(dataMessage);
+        } else if (WAIT_FOR_PASS.equals(state)) {
+            output = handleWaitForPassState(dataMessage);
+        } else {
+            output = handleBasicState(dataMessage);
+        }
+
+        sendAnswer(output, messageRecord.getMessage().getChatId().toString());
+    }
+
+    private String handleBasicState(DataMessage dataMessage) {
+        String output;
+        String text = dataMessage.getMessageText();
+
+        if (text != null && text.startsWith("/")) {
             output = processServiceCommand(dataMessage);
         } else {
             output = collatzService.processInput(dataMessage.getMessageText());
         }
-        sendAnswer(output, messageRecord.getMessage().getChatId().toString());
+        return output;
+    }
+
+    private String handleWaitForEmailState(DataMessage dataMessage) {
+        return "";
+    }
+
+    private String handleWaitForPassState(DataMessage dataMessage) {
+        return "";
+    }
+
+    private DataMessage saveOrModifyTextMessage(MessageRecord messageRecord) {
+        DataMessage dataMessage = findOrCreateDataMessage(messageRecord);
+        dataMessage.setMessageText(messageRecord.getMessage().getText());
+        log.debug("\n Message: " + dataMessage);
+        return dataMessageDAO.save(dataMessage);
     }
 
     private String processServiceCommand(DataMessage dataMessage) {
-        if ("/get_api_key".equals(dataMessage.getMessageText())) {
+        if (GET_API_KEY.equals(dataMessage.getMessageText())) {
             return getOrGenerateApiKey(dataMessage);
-        } else if ("/get_chat_id".equals(dataMessage.getMessageText())) {
+        } else if (GET_CHAT_ID.equals(dataMessage.getMessageText())) {
             return getChatId(dataMessage);
         } else {
             return "Unknown command!";
@@ -104,14 +141,14 @@ public class MainServiceImpl implements MainService {
     }
 
     private String getOrGenerateApiKey(DataMessage dataMessage) {
-        Optional<ApiKey> userApiKey = apiKeyDAO.findByServiceUser(dataMessage.getServiceUser());
+        Optional<ApiKey> userApiKey = apiKeyDAO.findByAppUser(dataMessage.getAppUser());
         String apiKey;
         if (userApiKey.isPresent()) {
             apiKey = userApiKey.get().getApiKey();
         } else {
             apiKey = UUID.randomUUID().toString();
             ApiKey newApiKey = ApiKey.builder()
-                    .serviceUser(dataMessage.getServiceUser())
+                    .appUser(dataMessage.getAppUser())
                     .apiKey(apiKey)
                     .build();
             apiKeyDAO.save(newApiKey);
@@ -172,9 +209,9 @@ public class MainServiceImpl implements MainService {
                     .errorMessage("Messages aren't found!")
                     .build();
         } else {
-            Long currentServiceUserId = optUserApiKey.get().getServiceUser().getId();
+            Long currentServiceUserId = optUserApiKey.get().getAppUser().getId();
             boolean isCurrentServiceUserMessages = optDataMessages.get().stream().allMatch(x ->
-                    x.getServiceUser().getId().equals(currentServiceUserId));
+                    x.getAppUser().getId().equals(currentServiceUserId));
             if (isCurrentServiceUserMessages) {
                 return MessageHistoryResponse.builder().messages(optDataMessages.get()).build();
             } else {

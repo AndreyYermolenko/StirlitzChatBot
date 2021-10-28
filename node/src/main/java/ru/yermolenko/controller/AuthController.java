@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yermolenko.exception.TokenRefreshException;
 import ru.yermolenko.model.RefreshToken;
 import ru.yermolenko.payload.request.LoginRequest;
-import ru.yermolenko.payload.request.SignupRequest;
 import ru.yermolenko.payload.request.TokenRefreshRequest;
 import ru.yermolenko.payload.response.JwtResponse;
 import ru.yermolenko.payload.response.MessageResponse;
@@ -43,17 +42,17 @@ public class AuthController {
         this.appUserService = appUserService;
     }
 
-    @PostMapping("/sign_up")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        MessageResponse messageResponse = appUserService.registerUser(signUpRequest);
-        log.debug(messageResponse);
-
-        if (messageResponse.hasError()) {
-            return ResponseEntity.badRequest().body(messageResponse);
-        } else {
-            return ResponseEntity.ok(messageResponse);
-        }
-    }
+//    @PostMapping("/sign_up")
+//    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+//        MessageResponse messageResponse = appUserService.registerUser(signUpRequest);
+//        log.debug(messageResponse);
+//
+//        if (messageResponse.hasError()) {
+//            return ResponseEntity.badRequest().body(messageResponse);
+//        } else {
+//            return ResponseEntity.ok(messageResponse);
+//        }
+//    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/confirm")
     public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {

@@ -4,8 +4,8 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.yermolenko.dao.RoleDAO;
 import ru.yermolenko.dao.AppUserDAO;
+import ru.yermolenko.dao.RoleDAO;
 import ru.yermolenko.model.AppUser;
 import ru.yermolenko.model.ERole;
 import ru.yermolenko.model.Role;
@@ -84,8 +84,8 @@ public class AppUserServiceImpl implements AppUserService {
             }
         }
 
-        AppUser user = new AppUser(signUpRequest.getUsername(), signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
+//        AppUser user = new AppUser(signUpRequest.getUsername(), signUpRequest.getEmail(),
+//                encoder.encode(signUpRequest.getPassword()));
 
         Set<String> rolesFromRequest = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
@@ -97,12 +97,12 @@ public class AppUserServiceImpl implements AppUserService {
         } else {
             rolesFromRequest.forEach(role -> {
                 switch (role) {
-                    case "admin":
-                        Role adminRole = roleDAO.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
+//                    case "admin":
+//                        Role adminRole = roleDAO.findByName(ERole.ROLE_ADMIN)
+//                                .orElseThrow(() -> new RuntimeException("Role is not found."));
+//                        roles.add(adminRole);
+//
+//                        break;
                     case "user":
                         Role userRole = roleDAO.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Role is not found."));
@@ -113,12 +113,12 @@ public class AppUserServiceImpl implements AppUserService {
             });
         }
 
-        user.setRoles(roles);
-        user.setIsActive(false);
-        AppUser persistentAppUser = appUserDAO.save(user);
+//        user.setRoles(roles);
+//        user.setIsActive(false);
+//        AppUser persistentAppUser = appUserDAO.save(user);
 
-        String message = createTextMessageForConfirmation(persistentAppUser.getId());
-        mailSenderService.send(persistentAppUser.getEmail(), "Activation", message);
+//        String message = createTextMessageForConfirmation(persistentAppUser.getId());
+//        mailSenderService.send(persistentAppUser.getEmail(), "Activation", message);
         return MessageResponse.builder()
                 .message("Please check your email and go to activate link!")
                 .error(false)

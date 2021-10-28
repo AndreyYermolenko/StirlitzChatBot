@@ -18,6 +18,6 @@ public class ApiKey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne(cascade = CascadeType.MERGE)
-    private ServiceUser serviceUser;
+    private AppUser appUser;
     private String apiKey;
 }

@@ -24,7 +24,7 @@ public class ConsumerServiceImpl {
 
     @RabbitListener(queues = "text_message_record")
     public void consumeTextMessageRecords(MessageRecord messageRecord) {
-        mainService.saveOrModifyTextMessage(messageRecord);
+        mainService.processTextMessage(messageRecord);
     }
 
     @RabbitListener(queues = "doc_message_record")

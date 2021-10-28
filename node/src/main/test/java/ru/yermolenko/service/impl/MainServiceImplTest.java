@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.yermolenko.dao.DataMessageDAO;
-import ru.yermolenko.dao.ServiceUserDAO;
+import ru.yermolenko.dao.AppUserDAO;
 import ru.yermolenko.dao.ApiKeyDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
@@ -42,7 +42,7 @@ class MainServiceImplTest {
     @MockBean
     private ApiKeyDAO apiKeyDAO;
     @MockBean
-    private ServiceUserDAO serviceUserDAO;
+    private AppUserDAO appUserDAO;
     @MockBean
     private ProducerService producerService;
 
@@ -76,13 +76,13 @@ class MainServiceImplTest {
                 .when(collatzService)
                 .processInput(anyString());
 
-        mainService.saveOrModifyTextMessage(messageRecord);
+        mainService.processTextMessage(messageRecord);
 
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .save(any(DataMessage.class));
         Mockito.verify(botService, Mockito.times(1))
                 .getPersistentBot(eq(messageRecord.getBotname()));
-        Mockito.verify(serviceUserDAO, Mockito.times(1))
+        Mockito.verify(appUserDAO, Mockito.times(1))
                 .findUserByExternalServiceId(eq(user.getId()));
         Mockito.verify(collatzService, Mockito.times(1))
                 .processInput(anyString());
@@ -121,46 +121,46 @@ class MainServiceImplTest {
                 .message(message)
                 .build();
 
-        ServiceUser transientServiceUser = ServiceUser.builder()
+        AppUser transientAppUser = AppUser.builder()
                 .externalServiceId(user.getId())
                 .username(user.getUserName())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();
-        ServiceUser persistentServiceUser = ServiceUser.builder()
+        AppUser persistentAppUser = AppUser.builder()
                 .id(1L)
-                .externalServiceId(transientServiceUser.getExternalServiceId())
-                .username(transientServiceUser.getUsername())
-                .firstName(transientServiceUser.getFirstName())
-                .lastName(transientServiceUser.getLastName())
+                .externalServiceId(transientAppUser.getExternalServiceId())
+                .username(transientAppUser.getUsername())
+                .firstName(transientAppUser.getFirstName())
+                .lastName(transientAppUser.getLastName())
                 .build();
 
-        Mockito.doReturn(persistentServiceUser)
-                .when(serviceUserDAO)
-                .save(transientServiceUser);
+        Mockito.doReturn(persistentAppUser)
+                .when(appUserDAO)
+                .save(transientAppUser);
 
         Mockito.doReturn(Optional.of(
                 ApiKey.builder()
                         .id(1L)
                         .apiKey(api_key)
-                        .serviceUser(persistentServiceUser)
+                        .appUser(persistentAppUser)
                         .build())
                 )
                 .when(apiKeyDAO)
-                .findByServiceUser(persistentServiceUser);
+                .findByAppUser(persistentAppUser);
 
-        mainService.saveOrModifyTextMessage(messageRecord);
+        mainService.processTextMessage(messageRecord);
 
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .save(any(DataMessage.class));
         Mockito.verify(botService, Mockito.times(1))
                 .getPersistentBot(eq(messageRecord.getBotname()));
-        Mockito.verify(serviceUserDAO, Mockito.times(1))
-                .save(eq(transientServiceUser));
+        Mockito.verify(appUserDAO, Mockito.times(1))
+                .save(eq(transientAppUser));
         Mockito.verify(collatzService, Mockito.times(0))
                 .processInput(anyString());
         Mockito.verify(apiKeyDAO, Mockito.times(1))
-                .findByServiceUser(eq(persistentServiceUser));
+                .findByAppUser(eq(persistentAppUser));
         Mockito.verify(apiKeyDAO, Mockito.times(0))
                 .save(any(ApiKey.class));
         Mockito.verify(producerService, Mockito.times(1))
@@ -196,42 +196,42 @@ class MainServiceImplTest {
                 .message(message)
                 .build();
 
-        ServiceUser transientServiceUser = ServiceUser.builder()
+        AppUser transientAppUser = AppUser.builder()
                 .externalServiceId(user.getId())
                 .username(user.getUserName())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();
-        ServiceUser persistentServiceUser = ServiceUser.builder()
+        AppUser persistentAppUser = AppUser.builder()
                 .id(1L)
-                .externalServiceId(transientServiceUser.getExternalServiceId())
-                .username(transientServiceUser.getUsername())
-                .firstName(transientServiceUser.getFirstName())
-                .lastName(transientServiceUser.getLastName())
+                .externalServiceId(transientAppUser.getExternalServiceId())
+                .username(transientAppUser.getUsername())
+                .firstName(transientAppUser.getFirstName())
+                .lastName(transientAppUser.getLastName())
                 .build();
 
-        Mockito.doReturn(persistentServiceUser)
-                .when(serviceUserDAO)
-                .save(transientServiceUser);
+        Mockito.doReturn(persistentAppUser)
+                .when(appUserDAO)
+                .save(transientAppUser);
 
         Mockito.doReturn(null)
                 .when(apiKeyDAO)
                 .save(ApiKey.builder()
-                        .serviceUser(persistentServiceUser)
+                        .appUser(persistentAppUser)
                         .build());
 
-        mainService.saveOrModifyTextMessage(messageRecord);
+        mainService.processTextMessage(messageRecord);
 
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .save(any(DataMessage.class));
         Mockito.verify(botService, Mockito.times(1))
                 .getPersistentBot(eq(messageRecord.getBotname()));
-        Mockito.verify(serviceUserDAO, Mockito.times(1))
-                .save(eq(transientServiceUser));
+        Mockito.verify(appUserDAO, Mockito.times(1))
+                .save(eq(transientAppUser));
         Mockito.verify(collatzService, Mockito.times(0))
                 .processInput(anyString());
         Mockito.verify(apiKeyDAO, Mockito.times(1))
-                .findByServiceUser(eq(persistentServiceUser));
+                .findByAppUser(eq(persistentAppUser));
         Mockito.verify(apiKeyDAO, Mockito.times(1))
                 .save(any(ApiKey.class));
         Mockito.verify(producerService, Mockito.times(1))
@@ -264,25 +264,25 @@ class MainServiceImplTest {
                 .message(message)
                 .build();
 
-        ServiceUser transientServiceUser = ServiceUser.builder()
+        AppUser transientAppUser = AppUser.builder()
                 .externalServiceId(user.getId())
                 .username(user.getUserName())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();
 
-        mainService.saveOrModifyTextMessage(messageRecord);
+        mainService.processTextMessage(messageRecord);
 
         Mockito.verify(dataMessageDAO, Mockito.times(1))
                 .save(any(DataMessage.class));
         Mockito.verify(botService, Mockito.times(1))
                 .getPersistentBot(eq(messageRecord.getBotname()));
-        Mockito.verify(serviceUserDAO, Mockito.times(1))
-                .save(eq(transientServiceUser));
+        Mockito.verify(appUserDAO, Mockito.times(1))
+                .save(eq(transientAppUser));
         Mockito.verify(collatzService, Mockito.times(0))
                 .processInput(anyString());
         Mockito.verify(apiKeyDAO, Mockito.times(0))
-                .findByServiceUser(any(ServiceUser.class));
+                .findByAppUser(any(AppUser.class));
         Mockito.verify(apiKeyDAO, Mockito.times(0))
                 .save(any(ApiKey.class));
         Mockito.verify(producerService, Mockito.times(1))
@@ -365,7 +365,7 @@ class MainServiceImplTest {
                 .limit(5)
                 .build();
 
-        ServiceUser persistentServiceUser = ServiceUser.builder()
+        AppUser persistentAppUser = AppUser.builder()
                 .id(1L)
                 .externalServiceId(45678)
                 .username("vano")
@@ -379,17 +379,17 @@ class MainServiceImplTest {
                 .build();
 
         DataMessage message1 = DataMessage.builder()
-                .serviceUser(ServiceUser.builder().id(2L).build())
+                .appUser(AppUser.builder().id(2L).build())
                 .build();
         DataMessage message2 = DataMessage.builder()
-                .serviceUser(ServiceUser.builder().id(1L).build())
+                .appUser(AppUser.builder().id(1L).build())
                 .build();
         List<DataMessage> dataMessages = Arrays.asList(message1, message2);
 
         Mockito.doReturn(Optional.of(ApiKey.builder()
                         .id(1L)
                         .apiKey(api_key)
-                        .serviceUser(persistentServiceUser)
+                        .appUser(persistentAppUser)
                         .build()))
                 .when(apiKeyDAO)
                 .findByApiKey(api_key);
@@ -418,7 +418,7 @@ class MainServiceImplTest {
                 .limit(5)
                 .build();
 
-        ServiceUser persistentServiceUser = ServiceUser.builder()
+        AppUser persistentAppUser = AppUser.builder()
                 .id(1L)
                 .externalServiceId(45678)
                 .username("vano")
@@ -427,10 +427,10 @@ class MainServiceImplTest {
                 .build();
 
         DataMessage message1 = DataMessage.builder()
-                .serviceUser(ServiceUser.builder().id(1L).build())
+                .appUser(AppUser.builder().id(1L).build())
                 .build();
         DataMessage message2 = DataMessage.builder()
-                .serviceUser(ServiceUser.builder().id(1L).build())
+                .appUser(AppUser.builder().id(1L).build())
                 .build();
         List<DataMessage> dataMessages = Arrays.asList(message1, message2);
         MessageHistoryResponse expectedResponse = MessageHistoryResponse.builder()
@@ -441,7 +441,7 @@ class MainServiceImplTest {
         Mockito.doReturn(Optional.of(ApiKey.builder()
                         .id(1L)
                         .apiKey(api_key)
-                        .serviceUser(persistentServiceUser)
+                        .appUser(persistentAppUser)
                         .build()))
                 .when(apiKeyDAO)
                 .findByApiKey(api_key);

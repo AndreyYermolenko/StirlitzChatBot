@@ -23,7 +23,7 @@ public class DataMessage {
     private Long id;
     private Integer externalServiceId;
     @OneToOne
-    private ServiceUser serviceUser;
+    private AppUser appUser;
     @Type(type = "text")
     private String messageText;
     @OneToOne

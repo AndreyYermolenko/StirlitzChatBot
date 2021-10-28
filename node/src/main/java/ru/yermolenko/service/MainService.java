@@ -7,8 +7,8 @@ import ru.yermolenko.payload.response.MessageHistoryResponse;
 
 public interface MainService {
     void saveRawData(GeneralRecord generalRecord);
-    ServiceUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser);
-    void saveOrModifyTextMessage(MessageRecord messageRecord);
+    AppUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser);
+    void processTextMessage(MessageRecord messageRecord);
     void saveOrModifyDocument(MessageRecord messageRecord);
     void saveOrModifyPhoto(MessageRecord messageRecord);
     MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest);
