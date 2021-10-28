@@ -30,13 +30,12 @@ public class MainServiceImpl implements MainService {
     private final ProducerService producerService;
     private final CollatzService collatzService;
     private final FileService fileService;
-    private final ApiKeyDAO apiKeyDAO;
     private final RoleDAO roleDAO;
     private final AppUserService appUserService;
 
     public MainServiceImpl(AppUserDAO appUserDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
                            BotService botService, ProducerService producerService,
-                           CollatzService collatzService, FileService fileService, ApiKeyDAO apiKeyDAO, RoleDAO roleDAO, AppUserService appUserService) {
+                           CollatzService collatzService, FileService fileService, RoleDAO roleDAO, AppUserService appUserService) {
         this.appUserDAO = appUserDAO;
         this.dataMessageDAO = dataMessageDAO;
         this.rawDataDAO = rawDataDAO;
@@ -44,7 +43,6 @@ public class MainServiceImpl implements MainService {
         this.producerService = producerService;
         this.collatzService = collatzService;
         this.fileService = fileService;
-        this.apiKeyDAO = apiKeyDAO;
         this.roleDAO = roleDAO;
         this.appUserService = appUserService;
     }
@@ -122,9 +120,7 @@ public class MainServiceImpl implements MainService {
     private String processServiceCommand(DataMessage dataMessage) {
         AppUser appUser = dataMessage.getAppUser();
         String cmd = dataMessage.getMessageText();
-        if (GET_API_KEY.equals(cmd)) {
-            return getOrGenerateApiKey(dataMessage);
-        } else if (GET_CHAT_ID.equals(cmd)) {
+        if (GET_CHAT_ID.equals(cmd)) {
             return getChatId(dataMessage);
         } else if (REGISTRATION.equals(cmd)){
             MessageResponse response = appUserService.registerUser(dataMessage.getAppUser());
@@ -142,27 +138,27 @@ public class MainServiceImpl implements MainService {
         }
     }
 
-    private String getOrGenerateApiKey(DataMessage dataMessage) {
-        AppUser appUser = dataMessage.getAppUser();
-        if (appUser.getIsActive()) {
-            Optional<ApiKey> userApiKey = apiKeyDAO.findByAppUser(dataMessage.getAppUser());
-            String apiKey;
-            if (userApiKey.isPresent()) {
-                apiKey = userApiKey.get().getApiKey();
-            } else {
-                apiKey = UUID.randomUUID().toString();
-                ApiKey newApiKey = ApiKey.builder()
-                        .appUser(dataMessage.getAppUser())
-                        .apiKey(apiKey)
-                        .build();
-                apiKeyDAO.save(newApiKey);
-            }
-            return "Ваш api key: " + apiKey;
-        } else {
-            return "Команда доступна только для зарегистрированных пользователей!\n" +
-                    "Введите /registration и пройдите простую регистрацию.";
-        }
-    }
+//    private String getOrGenerateApiKey(DataMessage dataMessage) {
+//        AppUser appUser = dataMessage.getAppUser();
+//        if (appUser.getIsActive()) {
+//            Optional<ApiKey> userApiKey = apiKeyDAO.findByAppUser(dataMessage.getAppUser());
+//            String apiKey;
+//            if (userApiKey.isPresent()) {
+//                apiKey = userApiKey.get().getApiKey();
+//            } else {
+//                apiKey = UUID.randomUUID().toString();
+//                ApiKey newApiKey = ApiKey.builder()
+//                        .appUser(dataMessage.getAppUser())
+//                        .apiKey(apiKey)
+//                        .build();
+//                apiKeyDAO.save(newApiKey);
+//            }
+//            return "Ваш api key: " + apiKey;
+//        } else {
+//            return "Команда доступна только для зарегистрированных пользователей!\n" +
+//                    "Введите /registration и пройдите простую регистрацию.";
+//        }
+//    }
 
     private String getChatId(DataMessage dataMessage) {
         return "Chat id : " + dataMessage.getChatId();
@@ -199,25 +195,28 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest) {
-        Optional<ApiKey> optUserApiKey = apiKeyDAO.findByApiKey(
-                messageHistoryRequest.getUserApiKey());
-        if (optUserApiKey.isEmpty()) {
-            return MessageHistoryResponse.builder()
-                    .error(true)
-                    .errorMessage("API key isn't found!")
-                    .build();
-        }
+    public MessageHistoryResponse getLastMessages(MessageHistoryRequest request) {
         Optional<List<DataMessage>> optDataMessages = dataMessageDAO.findLastMessagesByChatId(
-                messageHistoryRequest.getChatId(),
-                messageHistoryRequest.getLimit());
+                request.getChatId(),
+                request.getLimit());
+        return getFilterMessages(optDataMessages, request.getUserId());
+    }
+
+    @Override
+    public MessageHistoryResponse getAllMessages(MessageHistoryRequest request) {
+        Long chatId = request.getChatId();
+        Optional<List<DataMessage>> optDataMessages = dataMessageDAO.findAllByChatId(chatId);
+        return getFilterMessages(optDataMessages, request.getUserId());
+    }
+
+    private MessageHistoryResponse getFilterMessages(Optional<List<DataMessage>> optDataMessages,
+                                                     Long currentServiceUserId) {
         if (optDataMessages.isEmpty()) {
             return MessageHistoryResponse.builder()
                     .error(true)
                     .errorMessage("Messages aren't found!")
                     .build();
         } else {
-            Long currentServiceUserId = optUserApiKey.get().getAppUser().getId();
             boolean isCurrentServiceUserMessages = optDataMessages.get().stream().allMatch(x ->
                     x.getAppUser().getId().equals(currentServiceUserId));
             if (isCurrentServiceUserMessages) {
@@ -270,8 +269,7 @@ public class MainServiceImpl implements MainService {
         return "Список доступных команд:\n" +
                 "/abort - отмена выполнения текущей команды;\n" +
                 "/registration - регистрация пользователя для работы с API;\n" +
-                "/get_api_key - получение api_key (только для зарегистрированного пользователя)\n" +
-                "/get_chat_id - получение идентификатора чата (нужно для работы с некоторым API)\n" +
+                "/get_chat_id - получение идентификатора текущего чата (нужно для работы с некоторым API)\n" +
                 "/collatz - запуск collatz сервиса.";
     }
 }

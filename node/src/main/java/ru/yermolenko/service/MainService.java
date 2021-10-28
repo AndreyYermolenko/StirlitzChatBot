@@ -12,5 +12,6 @@ public interface MainService {
     void saveOrModifyDocument(MessageRecord messageRecord);
     void saveOrModifyPhoto(MessageRecord messageRecord);
     MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest);
+    MessageHistoryResponse getAllMessages(MessageHistoryRequest messageHistoryRequest);
     void sendTextMessage(TextMessageRequest request);
 }

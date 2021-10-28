@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class MessageHistoryRequest {
     @NotBlank
-    private String userApiKey;
+    private Long userId;
     @NotNull
     private Long chatId;
     @NotNull

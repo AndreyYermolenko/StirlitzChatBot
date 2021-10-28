@@ -42,7 +42,7 @@ public class AuthController {
         this.appUserService = appUserService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/confirm")
+    @GetMapping("/confirm")
     public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {
         MessageResponse messageResponse = appUserService.confirmRegistration(id);
         if (messageResponse.hasError()) {
