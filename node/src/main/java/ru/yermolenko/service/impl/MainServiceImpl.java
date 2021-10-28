@@ -96,6 +96,8 @@ public class MainServiceImpl implements MainService {
     private String processServiceCommand(DataMessage dataMessage) {
         if ("/get_api_key".equals(dataMessage.getMessageText())) {
             return getOrGenerateApiKey(dataMessage);
+        } else if ("/get_chat_id".equals(dataMessage.getMessageText())) {
+            return getChatId(dataMessage);
         } else {
             return "Unknown command!";
         }
@@ -115,6 +117,10 @@ public class MainServiceImpl implements MainService {
             apiKeyDAO.save(newApiKey);
         }
         return "Your api key: " + apiKey;
+    }
+
+    private String getChatId(DataMessage dataMessage) {
+        return "This chat id : " + dataMessage.getChatId();
     }
 
     @Override
