@@ -15,25 +15,25 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/data")
+@RequestMapping("/api/data/message")
 @Log4j
-public class MainApiController {
+public class MessageApiController {
 	private final DataMessageDAO dataMessageDAO;
 	private final MainService mainService;
 
-	public MainApiController(DataMessageDAO dataMessageDAO, MainService mainService) {
+	public MessageApiController(DataMessageDAO dataMessageDAO, MainService mainService) {
 		this.dataMessageDAO = dataMessageDAO;
 		this.mainService = mainService;
 	}
 
-	@GetMapping("/get_all_messages")
+	@GetMapping("/all")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> getAllMessages() {
 		List<DataMessage> dataMessages = dataMessageDAO.findAll();
 		return ResponseEntity.ok().body(dataMessages.toString());
 	}
 
-	@PostMapping("/get_last_messages")
+	@PostMapping("/last_few")
 	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	public ResponseEntity<?> getLastMessages(@Valid @RequestBody MessageHistoryRequest request) {
 		log.debug(request);
@@ -45,7 +45,7 @@ public class MainApiController {
 		}
 	}
 
-	@PostMapping("/send_message")
+	@PostMapping("/send")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> sendMessage(@Valid @RequestBody TextMessageRequest request) {
 		log.debug(request);
