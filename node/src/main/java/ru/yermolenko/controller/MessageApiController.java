@@ -27,14 +27,14 @@ public class MessageApiController {
 	}
 
 	@GetMapping("/all")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<String> getAllMessages() {
 		List<DataMessage> dataMessages = dataMessageDAO.findAll();
 		return ResponseEntity.ok().body(dataMessages.toString());
 	}
 
 	@PostMapping("/last_few")
-	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<?> getLastMessages(@Valid @RequestBody MessageHistoryRequest request) {
 		log.debug(request);
 		MessageHistoryResponse result = mainService.getLastMessages(request);

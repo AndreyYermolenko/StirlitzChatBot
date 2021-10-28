@@ -5,6 +5,7 @@ public enum ServiceCommand {
     GET_API_KEY("/get_api_key"),
     GET_CHAT_ID("/get_chat_id"),
     REGISTRATION("/registration"),
+    COLLATZ("/collatz"),
     ABORT("/abort");
     private final String cmd;
 

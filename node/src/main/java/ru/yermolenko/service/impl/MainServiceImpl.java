@@ -4,22 +4,20 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.yermolenko.dao.DataMessageDAO;
-import ru.yermolenko.dao.RawDataDAO;
-import ru.yermolenko.dao.AppUserDAO;
-import ru.yermolenko.dao.ApiKeyDAO;
+import ru.yermolenko.dao.*;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.request.TextMessageRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
+import ru.yermolenko.payload.response.MessageResponse;
 import ru.yermolenko.service.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
-import static ru.yermolenko.model.ServiceCommand.GET_API_KEY;
-import static ru.yermolenko.model.ServiceCommand.GET_CHAT_ID;
+import static ru.yermolenko.model.ServiceCommand.*;
 import static ru.yermolenko.model.UserState.*;
 
 @Log4j
@@ -33,10 +31,12 @@ public class MainServiceImpl implements MainService {
     private final CollatzService collatzService;
     private final FileService fileService;
     private final ApiKeyDAO apiKeyDAO;
+    private final RoleDAO roleDAO;
+    private final AppUserService appUserService;
 
     public MainServiceImpl(AppUserDAO appUserDAO, DataMessageDAO dataMessageDAO, RawDataDAO rawDataDAO,
                            BotService botService, ProducerService producerService,
-                           CollatzService collatzService, FileService fileService, ApiKeyDAO apiKeyDAO) {
+                           CollatzService collatzService, FileService fileService, ApiKeyDAO apiKeyDAO, RoleDAO roleDAO, AppUserService appUserService) {
         this.appUserDAO = appUserDAO;
         this.dataMessageDAO = dataMessageDAO;
         this.rawDataDAO = rawDataDAO;
@@ -45,19 +45,24 @@ public class MainServiceImpl implements MainService {
         this.collatzService = collatzService;
         this.fileService = fileService;
         this.apiKeyDAO = apiKeyDAO;
+        this.roleDAO = roleDAO;
+        this.appUserService = appUserService;
     }
 
     @Override
     public AppUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser) {
         AppUser persistentServiceUser = appUserDAO.findUserByExternalServiceId(externalServiceUser.getId());
         if (persistentServiceUser == null) {
+            Role userRole = roleDAO.findByName(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Role is not found."));
             AppUser transientAppUser = AppUser.builder()
                     .externalServiceId(externalServiceUser.getId())
                     .username(externalServiceUser.getUserName())
                     .firstName(externalServiceUser.getFirstName())
                     .lastName(externalServiceUser.getLastName())
+                    .roles(Set.of(userRole))
                     .isActive(false)
-                    .state(BASIC)
+                    .state(BASIC_STATE)
                     .build();
             return appUserDAO.save(transientAppUser);
         }
@@ -86,41 +91,25 @@ public class MainServiceImpl implements MainService {
     @Override
     public void processTextMessage(MessageRecord messageRecord) {
         DataMessage dataMessage = saveOrModifyTextMessage(messageRecord);
-        String output;
         UserState state = dataMessage.getAppUser().getState();
+        String text = dataMessage.getMessageText();
+        String output;
 
-        log.debug("State : " + state);
-        log.debug("isActive : " + dataMessage.getAppUser().getIsActive());
-
-        if (WAIT_FOR_EMAIL.equals(state)) {
-            output = handleWaitForEmailState(dataMessage);
-        } else if (WAIT_FOR_PASS.equals(state)) {
-            output = handleWaitForPassState(dataMessage);
+        if (ABORT.equals(text)) {
+            output = abortProcess(dataMessage).getMessage();
+        } else if (BASIC_STATE.equals(state)) {
+            output = processServiceCommand(dataMessage);
+        } else if (WAIT_FOR_EMAIL_STATE.equals(state)) {
+            output = appUserService.setEmail(dataMessage).getMessage();
+        } else if (WAIT_FOR_PASSWORD_STATE.equals(state)) {
+            output = appUserService.setPassword(dataMessage).getMessage();
+        } else if (COLLATZ_STATE.equals(state)) {
+            output = collatzService.processInput(text);
         } else {
-            output = handleBasicState(dataMessage);
+            output = "Неизвестная ошибка! Введите /abort и попробуйте снова!";
         }
 
         sendAnswer(output, messageRecord.getMessage().getChatId().toString());
-    }
-
-    private String handleBasicState(DataMessage dataMessage) {
-        String output;
-        String text = dataMessage.getMessageText();
-
-        if (text != null && text.startsWith("/")) {
-            output = processServiceCommand(dataMessage);
-        } else {
-            output = collatzService.processInput(dataMessage.getMessageText());
-        }
-        return output;
-    }
-
-    private String handleWaitForEmailState(DataMessage dataMessage) {
-        return "";
-    }
-
-    private String handleWaitForPassState(DataMessage dataMessage) {
-        return "";
     }
 
     private DataMessage saveOrModifyTextMessage(MessageRecord messageRecord) {
@@ -131,33 +120,52 @@ public class MainServiceImpl implements MainService {
     }
 
     private String processServiceCommand(DataMessage dataMessage) {
-        if (GET_API_KEY.equals(dataMessage.getMessageText())) {
+        AppUser appUser = dataMessage.getAppUser();
+        String cmd = dataMessage.getMessageText();
+        if (GET_API_KEY.equals(cmd)) {
             return getOrGenerateApiKey(dataMessage);
-        } else if (GET_CHAT_ID.equals(dataMessage.getMessageText())) {
+        } else if (GET_CHAT_ID.equals(cmd)) {
             return getChatId(dataMessage);
+        } else if (REGISTRATION.equals(cmd)){
+            MessageResponse response = appUserService.registerUser(dataMessage.getAppUser());
+            if (!response.hasError()) {
+                changeUserState(appUser, WAIT_FOR_EMAIL_STATE);
+            }
+            return response.getMessage();
+        } else if (COLLATZ.equals(cmd)) {
+            changeUserState(appUser, COLLATZ_STATE);
+            return "Начнём... Введите, пожалуйста, число!";
+        } else if (HELP.equals(cmd)) {
+            return help();
         } else {
-            return "Unknown command!";
+            return "Неизвестная команда! Чтобы узнать список доступных комманд введите /help";
         }
     }
 
     private String getOrGenerateApiKey(DataMessage dataMessage) {
-        Optional<ApiKey> userApiKey = apiKeyDAO.findByAppUser(dataMessage.getAppUser());
-        String apiKey;
-        if (userApiKey.isPresent()) {
-            apiKey = userApiKey.get().getApiKey();
+        AppUser appUser = dataMessage.getAppUser();
+        if (appUser.getIsActive()) {
+            Optional<ApiKey> userApiKey = apiKeyDAO.findByAppUser(dataMessage.getAppUser());
+            String apiKey;
+            if (userApiKey.isPresent()) {
+                apiKey = userApiKey.get().getApiKey();
+            } else {
+                apiKey = UUID.randomUUID().toString();
+                ApiKey newApiKey = ApiKey.builder()
+                        .appUser(dataMessage.getAppUser())
+                        .apiKey(apiKey)
+                        .build();
+                apiKeyDAO.save(newApiKey);
+            }
+            return "Ваш api key: " + apiKey;
         } else {
-            apiKey = UUID.randomUUID().toString();
-            ApiKey newApiKey = ApiKey.builder()
-                    .appUser(dataMessage.getAppUser())
-                    .apiKey(apiKey)
-                    .build();
-            apiKeyDAO.save(newApiKey);
+            return "Команда доступна только для зарегистрированных пользователей!\n" +
+                    "Введите /registration и пройдите простую регистрацию.";
         }
-        return "Your api key: " + apiKey;
     }
 
     private String getChatId(DataMessage dataMessage) {
-        return "This chat id : " + dataMessage.getChatId();
+        return "Chat id : " + dataMessage.getChatId();
     }
 
     @Override
@@ -241,5 +249,29 @@ public class MainServiceImpl implements MainService {
         sendMessage.setChatId(chatId);
         sendMessage.setText(answer);
         producerService.produceAnswer(sendMessage);
+    }
+
+    private void changeUserState(AppUser appUser, UserState newState) {
+        appUser.setState(newState);
+        appUserDAO.save(appUser);
+    }
+
+    private MessageResponse abortProcess(DataMessage dataMessage) {
+        AppUser appUser = dataMessage.getAppUser();
+        appUser.setState(BASIC_STATE);
+        appUserDAO.save(appUser);
+        return MessageResponse.builder()
+                .error(false)
+                .message("Команда отменена!")
+                .build();
+    }
+
+    private String help() {
+        return "Список доступных команд:\n" +
+                "/abort - отмена выполнения текущей команды;\n" +
+                "/registration - регистрация пользователя для работы с API;\n" +
+                "/get_api_key - получение api_key (только для зарегистрированного пользователя)\n" +
+                "/get_chat_id - получение идентификатора чата (нужно для работы с некоторым API)\n" +
+                "/collatz - запуск collatz сервиса.";
     }
 }

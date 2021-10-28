@@ -5,25 +5,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.yermolenko.dao.AppUserDAO;
-import ru.yermolenko.dao.RoleDAO;
 import ru.yermolenko.model.AppUser;
-import ru.yermolenko.model.ERole;
-import ru.yermolenko.model.Role;
-import ru.yermolenko.payload.request.SignupRequest;
+import ru.yermolenko.model.DataMessage;
 import ru.yermolenko.payload.response.MessageResponse;
-import ru.yermolenko.service.MailSenderService;
 import ru.yermolenko.service.AppUserService;
+import ru.yermolenko.service.MailSenderService;
 import ru.yermolenko.tools.CryptoTool;
 
-import java.util.HashSet;
-import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import static ru.yermolenko.model.UserState.*;
 
 @Service
 @Log4j
 public class AppUserServiceImpl implements AppUserService {
     private final AppUserDAO appUserDAO;
     private final PasswordEncoder encoder;
-    private final RoleDAO roleDAO;
     private final CryptoTool cryptoTool;
     private final MailSenderService mailSenderService;
     @Value("${link.address}")
@@ -31,98 +29,91 @@ public class AppUserServiceImpl implements AppUserService {
     @Value("${server.port}")
     private String serverPort;
 
-    public AppUserServiceImpl(AppUserDAO appUserDAO, PasswordEncoder encoder, RoleDAO roleDAO,
-                              CryptoTool cryptoTool, MailSenderService mailSenderService) {
+    public AppUserServiceImpl(AppUserDAO appUserDAO, PasswordEncoder encoder, CryptoTool cryptoTool,
+                              MailSenderService mailSenderService) {
         this.appUserDAO = appUserDAO;
         this.encoder = encoder;
-        this.roleDAO = roleDAO;
         this.cryptoTool = cryptoTool;
         this.mailSenderService = mailSenderService;
     }
 
     @Override
-    public MessageResponse registerUser(SignupRequest signUpRequest) {
-        AppUser userByUsername = appUserDAO.findByUsername(signUpRequest.getUsername()).orElse(null);
-        AppUser userByEmail = appUserDAO.findByEmail(signUpRequest.getEmail()).orElse(null);
-        if (userByUsername != null && !userByUsername.getIsActive() && userByEmail == null) {
+    public MessageResponse registerUser(AppUser appUser) {
+        if (appUser.getIsActive()) {
             return MessageResponse.builder()
-                    .message("Please check your email which you sent early for activation " +
-                            "else choose a new username with current email!")
                     .error(true)
+                    .message("Вы уже зарегистрированы!")
+                    .build();
+        }
+        return MessageResponse.builder()
+                .error(false)
+                .message("Введите, пожалуйста, ваш email:")
+                .build();
+    }
+
+    @Override
+    public MessageResponse setEmail(DataMessage dataMessage) {
+        String email = dataMessage.getMessageText();
+        AppUser appUser = dataMessage.getAppUser();
+        boolean result = true;
+
+        try {
+            InternetAddress emailAddr = new InternetAddress(email);
+            emailAddr.validate();
+        } catch (AddressException ex) {
+            result = false;
+        }
+
+        if (!result) {
+            return MessageResponse.builder()
+                    .error(true)
+                    .message("Пожалуйста, введите, корректный email!")
                     .build();
         }
 
-        if (userByUsername != null) {
-            if (userByUsername.getIsActive()) {
-                return MessageResponse.builder()
-                        .message("Username is already taken!")
-                        .error(true)
-                        .build();
-            } else {
-                String message = createTextMessageForConfirmation(userByUsername.getId());
-                mailSenderService.send(userByUsername.getEmail(), "Activation", message);
-                return MessageResponse.builder()
-                        .message("Please check your email and go to activate link!")
-                        .error(false)
-                        .build();
-            }
-        }
-
-        if (userByEmail != null) {
-            if (userByEmail.getIsActive()) {
-                return MessageResponse.builder()
-                        .message("Email is already in use!")
-                        .error(true)
-                        .build();
-            } else {
-                String message = createTextMessageForConfirmation(userByEmail.getId());
-                mailSenderService.send(userByEmail.getEmail(), "Activation", message);
-                return MessageResponse.builder()
-                        .message("Please check your email and go to activate link!")
-                        .error(false)
-                        .build();
-            }
-        }
-
-//        AppUser user = new AppUser(signUpRequest.getUsername(), signUpRequest.getEmail(),
-//                encoder.encode(signUpRequest.getPassword()));
-
-        Set<String> rolesFromRequest = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
-
-        if (rolesFromRequest == null || rolesFromRequest.isEmpty()) {
-            Role userRole = roleDAO.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Role is not found."));
-            roles.add(userRole);
+        AppUser userByEmail = appUserDAO.findByEmail(email).orElse(null);
+        if (userByEmail == null || userByEmail.getId().equals(appUser.getId())) {
+            appUser.setEmail(email);
+            appUser.setState(WAIT_FOR_PASSWORD_STATE);
+            appUserDAO.save(appUser);
+            return MessageResponse.builder()
+                    .error(false)
+                    .message("Отлично! А теперь введите ваш пароль. Подходящий пароль содержит, как минимум, " +
+                            "верхний регистр, одну строчную букву, одну цифру и длиной от 6 до 10 символов.")
+                    .build();
         } else {
-            rolesFromRequest.forEach(role -> {
-                switch (role) {
-//                    case "admin":
-//                        Role adminRole = roleDAO.findByName(ERole.ROLE_ADMIN)
-//                                .orElseThrow(() -> new RuntimeException("Role is not found."));
-//                        roles.add(adminRole);
-//
-//                        break;
-                    case "user":
-                        Role userRole = roleDAO.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Role is not found."));
-                        roles.add(userRole);
-
-                        break;
-                }
-            });
+            return MessageResponse.builder()
+                    .error(true)
+                    .message("Этот email уже используется! Введите корректный email!")
+                    .build();
         }
+    }
 
-//        user.setRoles(roles);
-//        user.setIsActive(false);
-//        AppUser persistentAppUser = appUserDAO.save(user);
+    @Override
+    public MessageResponse setPassword(DataMessage dataMessage) {
+        String regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,10}$";
+        String password = dataMessage.getMessageText();
+        AppUser appUser = dataMessage.getAppUser();
 
-//        String message = createTextMessageForConfirmation(persistentAppUser.getId());
-//        mailSenderService.send(persistentAppUser.getEmail(), "Activation", message);
-        return MessageResponse.builder()
-                .message("Please check your email and go to activate link!")
-                .error(false)
-                .build();
+        if (password.matches(regexp)) {
+            appUser.setState(BASIC_STATE);
+            appUser.setPassword(encoder.encode(password));
+            appUserDAO.save(appUser);
+
+            String message = createTextMessageForConfirmation(appUser.getId());
+            mailSenderService.send(appUser.getEmail(), "Activation", message);
+
+            return MessageResponse.builder()
+                    .error(false)
+                    .message("Отлично! Чтобы закончить регистрацию - проверьте ваш email и подтвердите его!")
+                    .build();
+        } else {
+            return MessageResponse.builder()
+                    .error(true)
+                    .message("Пароль неккоректный! Подходящий пароль содержит, как минимум, " +
+                            "верхний регистр, одну строчную букву, одну цифру и длиной от 6 до 10 символов")
+                    .build();
+        }
     }
 
     @Override

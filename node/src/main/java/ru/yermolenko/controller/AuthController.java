@@ -42,18 +42,6 @@ public class AuthController {
         this.appUserService = appUserService;
     }
 
-//    @PostMapping("/sign_up")
-//    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-//        MessageResponse messageResponse = appUserService.registerUser(signUpRequest);
-//        log.debug(messageResponse);
-//
-//        if (messageResponse.hasError()) {
-//            return ResponseEntity.badRequest().body(messageResponse);
-//        } else {
-//            return ResponseEntity.ok(messageResponse);
-//        }
-//    }
-
     @RequestMapping(method = RequestMethod.GET, value = "/confirm")
     public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {
         MessageResponse messageResponse = appUserService.confirmRegistration(id);

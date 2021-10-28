@@ -1,5 +1,8 @@
 package ru.yermolenko.model;
 
 public enum UserState {
-    BASIC, WAIT_FOR_EMAIL, WAIT_FOR_PASS;
+    BASIC_STATE,
+    WAIT_FOR_EMAIL_STATE,
+    WAIT_FOR_PASSWORD_STATE,
+    COLLATZ_STATE;
 }
