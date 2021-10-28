@@ -1,5 +1,6 @@
 package ru.yermolenko.controller;
 
+import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.log4j.Log4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -70,16 +71,18 @@ public class AuthController {
             userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
-    @PostMapping("/refresh_token")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
-
+    @ApiImplicitParam(name = "refresh-token", value = "Refresh Token", required = true,
+            allowEmptyValue = false, paramType = "header",
+            dataTypeClass = String.class)
+    @GetMapping("/new_pair_tokens")
+    public ResponseEntity<?> refreshToken(
+            @RequestHeader(value = "refresh-token", required = true) String requestRefreshToken) {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUsername)
                 .map(username -> {
                     String accessToken = jwtUtils.generateTokenFromUsername(username);
-                    refreshTokenService.deleteByToken(request.getRefreshToken());
+                    refreshTokenService.deleteByToken(requestRefreshToken);
                     RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(username);
                     return ResponseEntity.ok(new TokenRefreshResponse(accessToken, newRefreshToken.getToken()));
                 })

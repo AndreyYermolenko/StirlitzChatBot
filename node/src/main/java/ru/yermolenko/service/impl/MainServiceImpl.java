@@ -4,7 +4,10 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.yermolenko.dao.*;
+import ru.yermolenko.dao.AppUserDAO;
+import ru.yermolenko.dao.DataMessageDAO;
+import ru.yermolenko.dao.RawDataDAO;
+import ru.yermolenko.dao.RoleDAO;
 import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.request.TextMessageRequest;
@@ -15,7 +18,6 @@ import ru.yermolenko.service.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static ru.yermolenko.model.ServiceCommand.*;
 import static ru.yermolenko.model.UserState.*;
@@ -231,8 +233,10 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public void sendTextMessage(TextMessageRequest request) {
-        sendAnswer(request.getMessage(), request.getChatId().toString());
+    public void sendTextMessage(TextMessageRequest request, Long userId) {
+        AppUser appUser = appUserDAO.findById(userId).get();
+        sendAnswer(appUser.getFirstName() + " " + appUser.getLastName() + ": " + request.getMessage(),
+                request.getChatId().toString());
     }
 
     public void saveRawData(GeneralRecord generalRecord) {

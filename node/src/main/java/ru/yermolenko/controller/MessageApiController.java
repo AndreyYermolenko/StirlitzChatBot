@@ -44,8 +44,6 @@ public class MessageApiController {
 	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<?> getLastMessages(@RequestParam @NotBlank Long chatId,
 											 @RequestParam @NotBlank Integer limit) {
-		log.debug("chatId " + chatId);
-		log.debug("limit " + limit);
 		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		MessageHistoryResponse result = mainService.getLastMessages(
 				MessageHistoryRequest.builder()
@@ -63,8 +61,8 @@ public class MessageApiController {
 	@PostMapping("/send")
 	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<?> sendMessage(@Valid @RequestBody TextMessageRequest request) {
-		log.debug(request);
-		mainService.sendTextMessage(request);
+		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		mainService.sendTextMessage(request, userDetails.getId());
 		return ResponseEntity.ok().build();
 	}
 }

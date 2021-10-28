@@ -13,5 +13,5 @@ public interface MainService {
     void saveOrModifyPhoto(MessageRecord messageRecord);
     MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest);
     MessageHistoryResponse getAllMessages(MessageHistoryRequest messageHistoryRequest);
-    void sendTextMessage(TextMessageRequest request);
+    void sendTextMessage(TextMessageRequest request, Long userId);
 }
