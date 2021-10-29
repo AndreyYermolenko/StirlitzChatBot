@@ -54,17 +54,17 @@ public class AppUserServiceImpl implements AppUserService {
     @Override
     public MessageResponse setEmail(DataMessage dataMessage) {
         String email = dataMessage.getMessageText();
-        AppUser appUser = dataMessage.getAppUser();
-        boolean result = true;
+        AppUser currentAppUser = dataMessage.getAppUser();
+        boolean parseError = false;
 
         try {
             InternetAddress emailAddr = new InternetAddress(email);
             emailAddr.validate();
         } catch (AddressException ex) {
-            result = false;
+            parseError = true;
         }
 
-        if (!result) {
+        if (parseError) {
             return MessageResponse.builder()
                     .error(true)
                     .message("Пожалуйста, введите, корректный email!")
@@ -72,10 +72,10 @@ public class AppUserServiceImpl implements AppUserService {
         }
 
         AppUser userByEmail = appUserDAO.findByEmail(email).orElse(null);
-        if (userByEmail == null || userByEmail.getId().equals(appUser.getId())) {
-            appUser.setEmail(email);
-            appUser.setState(WAIT_FOR_PASSWORD_STATE);
-            appUserDAO.save(appUser);
+        if (userByEmail == null || userByEmail.getId().equals(currentAppUser.getId())) {
+            currentAppUser.setEmail(email);
+            currentAppUser.setState(WAIT_FOR_PASSWORD_STATE);
+            appUserDAO.save(currentAppUser);
             return MessageResponse.builder()
                     .error(false)
                     .message("Отлично! А теперь введите ваш пароль. Подходящий пароль содержит, как минимум, " +

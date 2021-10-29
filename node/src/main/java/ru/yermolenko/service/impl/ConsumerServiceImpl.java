@@ -5,11 +5,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import ru.yermolenko.model.GeneralRecord;
 import ru.yermolenko.model.MessageRecord;
+import ru.yermolenko.service.ConsumerService;
 import ru.yermolenko.service.MainService;
 
 @Service
 @Log4j
-public class ConsumerServiceImpl {
+public class ConsumerServiceImpl implements ConsumerService {
     private final MainService mainService;
 
     public ConsumerServiceImpl(MainService mainService) {

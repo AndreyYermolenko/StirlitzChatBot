@@ -141,28 +141,6 @@ public class MainServiceImpl implements MainService {
         }
     }
 
-//    private String getOrGenerateApiKey(DataMessage dataMessage) {
-//        AppUser appUser = dataMessage.getAppUser();
-//        if (appUser.getIsActive()) {
-//            Optional<ApiKey> userApiKey = apiKeyDAO.findByAppUser(dataMessage.getAppUser());
-//            String apiKey;
-//            if (userApiKey.isPresent()) {
-//                apiKey = userApiKey.get().getApiKey();
-//            } else {
-//                apiKey = UUID.randomUUID().toString();
-//                ApiKey newApiKey = ApiKey.builder()
-//                        .appUser(dataMessage.getAppUser())
-//                        .apiKey(apiKey)
-//                        .build();
-//                apiKeyDAO.save(newApiKey);
-//            }
-//            return "Ваш api key: " + apiKey;
-//        } else {
-//            return "Команда доступна только для зарегистрированных пользователей!\n" +
-//                    "Введите /registration и пройдите простую регистрацию.";
-//        }
-//    }
-
     private String getChatId(DataMessage dataMessage) {
         return "Chat id : " + dataMessage.getChatId();
     }

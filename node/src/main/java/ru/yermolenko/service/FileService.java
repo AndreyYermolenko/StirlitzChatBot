@@ -5,8 +5,6 @@ import ru.yermolenko.model.Document;
 import ru.yermolenko.model.LinkType;
 import ru.yermolenko.model.Photo;
 
-import javax.print.Doc;
-
 public interface FileService {
     Document processDoc(Message externalMessage);
     Photo processPhoto(Message externalMessage);
