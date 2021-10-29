@@ -2,7 +2,6 @@ package ru.yermolenko.model;
 
 public enum ServiceCommand {
     HELP("/help"),
-    GET_API_KEY("/get_api_key"),
     GET_CHAT_ID("/get_chat_id"),
     REGISTRATION("/registration"),
     COLLATZ("/collatz"),
