@@ -1,6 +1,9 @@
 package ru.yermolenko.service;
 
-import ru.yermolenko.model.*;
+import org.telegram.telegrambots.meta.api.objects.User;
+import ru.yermolenko.model.AppUser;
+import ru.yermolenko.model.GeneralRecord;
+import ru.yermolenko.model.MessageRecord;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.request.TextMessageRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
@@ -8,7 +11,7 @@ import ru.yermolenko.payload.response.MessageResponse;
 
 public interface MainService {
     void saveRawData(GeneralRecord generalRecord);
-    AppUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser);
+    AppUser findOrSaveUser(User user);
     void processTextMessage(MessageRecord messageRecord);
     void saveOrModifyDocument(MessageRecord messageRecord);
     void saveOrModifyPhoto(MessageRecord messageRecord);

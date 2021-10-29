@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.User;
 import ru.yermolenko.dao.AppUserDAO;
 import ru.yermolenko.dao.DataMessageDAO;
 import ru.yermolenko.dao.RawDataDAO;
@@ -51,7 +52,7 @@ public class MainServiceImpl implements MainService {
     }
 
     @Override
-    public AppUser findOrSaveUser(org.telegram.telegrambots.meta.api.objects.User externalServiceUser) {
+    public AppUser findOrSaveUser(User externalServiceUser) {
         AppUser persistentServiceUser = appUserDAO.findUserByExternalServiceId(externalServiceUser.getId());
         if (persistentServiceUser == null) {
             Role userRole = roleDAO.findByName(ERole.ROLE_USER)
@@ -125,7 +126,7 @@ public class MainServiceImpl implements MainService {
         String cmd = dataMessage.getMessageText();
         if (GET_CHAT_ID.equals(cmd)) {
             return getChatId(dataMessage);
-        } else if (REGISTRATION.equals(cmd)){
+        } else if (REGISTRATION.equals(cmd)) {
             MessageResponse response = appUserService.registerUser(dataMessage.getAppUser());
             if (!response.hasError()) {
                 changeUserState(appUser, WAIT_FOR_EMAIL_STATE);
@@ -136,6 +137,9 @@ public class MainServiceImpl implements MainService {
             return "Начнём... Введите, пожалуйста, число!";
         } else if (HELP.equals(cmd)) {
             return help();
+        } else if (START.equals(cmd)) {
+            return "Приветствую тебя, повелитель земли и неба, морей и океанов, звёзд и планет!\n" +
+                    "Чтобы посмотреть список доступных комманд введи /help";
         } else {
             return "Неизвестная команда! Чтобы узнать список доступных комманд введите /help";
         }
