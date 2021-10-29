@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.request.TextMessageRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
+import ru.yermolenko.payload.response.MessageResponse;
 import ru.yermolenko.security.services.UserDetailsImpl;
 import ru.yermolenko.service.MainService;
 
@@ -26,7 +27,7 @@ public class MessageApiController {
 
 	@GetMapping("/all")
 	@PreAuthorize("hasRole('USER')")
-	public ResponseEntity<?> getAllMessages(@RequestParam @NotBlank Long chatId) {
+	public ResponseEntity<MessageHistoryResponse> getAllMessages(@RequestParam @NotBlank Long chatId) {
 		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		MessageHistoryResponse result = mainService.getAllMessages(
 				MessageHistoryRequest.builder()
@@ -42,7 +43,7 @@ public class MessageApiController {
 
 	@GetMapping("/last_few")
 	@PreAuthorize("hasRole('USER')")
-	public ResponseEntity<?> getLastMessages(@RequestParam @NotBlank Long chatId,
+	public ResponseEntity<MessageHistoryResponse> getLastMessages(@RequestParam @NotBlank Long chatId,
 											 @RequestParam @NotBlank Integer limit) {
 		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		MessageHistoryResponse result = mainService.getLastMessages(
@@ -64,5 +65,18 @@ public class MessageApiController {
 		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		mainService.sendTextMessage(request, userDetails.getId());
 		return ResponseEntity.ok().build();
+	}
+
+	@DeleteMapping("/delete")
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<MessageResponse> deleteMessage(@RequestParam @NotBlank Long chatId,
+										   @RequestParam @NotBlank Integer messageId) {
+		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		MessageResponse response = mainService.deleteTextMessage(chatId, messageId, userDetails.getId());
+		if(!response.hasError()) {
+			return ResponseEntity.ok().body(response);
+		} else {
+			return ResponseEntity.badRequest().body(response);
+		}
 	}
 }

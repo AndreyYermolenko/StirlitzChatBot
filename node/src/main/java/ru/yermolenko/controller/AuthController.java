@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yermolenko.exception.TokenRefreshException;
 import ru.yermolenko.model.RefreshToken;
 import ru.yermolenko.payload.request.LoginRequest;
-import ru.yermolenko.payload.request.TokenRefreshRequest;
 import ru.yermolenko.payload.response.JwtResponse;
 import ru.yermolenko.payload.response.MessageResponse;
 import ru.yermolenko.payload.response.TokenRefreshResponse;
@@ -44,7 +43,7 @@ public class AuthController {
     }
 
     @GetMapping("/confirm")
-    public ResponseEntity<?> confirmRegistration(@RequestParam("id") String id) {
+    public ResponseEntity<MessageResponse> confirmRegistration(@RequestParam("id") String id) {
         MessageResponse messageResponse = appUserService.confirmRegistration(id);
         if (messageResponse.hasError()) {
             return ResponseEntity.badRequest().body(messageResponse);
@@ -54,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign_in")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager
             .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -75,7 +74,7 @@ public class AuthController {
             allowEmptyValue = false, paramType = "header",
             dataTypeClass = String.class)
     @GetMapping("/new_pair_tokens")
-    public ResponseEntity<?> refreshToken(
+    public ResponseEntity<TokenRefreshResponse> refreshToken(
             @RequestHeader(value = "refresh-token", required = true) String requestRefreshToken) {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
@@ -91,7 +90,7 @@ public class AuthController {
 
     @GetMapping("/logout")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> logoutUser() {
+    public ResponseEntity<MessageResponse> logoutUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return refreshTokenService.findByUsername(userDetails.getUsername())
                 .map(refreshToken -> {

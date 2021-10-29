@@ -35,7 +35,12 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    public Queue answerFromNode() {
-        return new Queue("answerFromNode");
+    public Queue messageToSend() {
+        return new Queue("messageToSend");
+    }
+
+    @Bean
+    public Queue messageToDelete() {
+        return new Queue("messageToDelete");
     }
 }

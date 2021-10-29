@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -35,13 +37,21 @@ public class DispatcherBot extends TelegramWebhookBot {
         return token;
     }
 
-    public void setView(SendMessage message) {
+    public void sendMessage(SendMessage message) {
         if (message != null) {
             try {
                 execute(message);
             } catch (TelegramApiException e) {
                 log.error(e);
             }
+        }
+    }
+
+    public void deleteMessage(DeleteMessage deleteMessage) {
+        try {
+            execute(deleteMessage);
+        } catch (TelegramApiException ex){
+            log.error(ex);
         }
     }
 

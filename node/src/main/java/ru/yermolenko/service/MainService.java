@@ -4,6 +4,7 @@ import ru.yermolenko.model.*;
 import ru.yermolenko.payload.request.MessageHistoryRequest;
 import ru.yermolenko.payload.request.TextMessageRequest;
 import ru.yermolenko.payload.response.MessageHistoryResponse;
+import ru.yermolenko.payload.response.MessageResponse;
 
 public interface MainService {
     void saveRawData(GeneralRecord generalRecord);
@@ -14,4 +15,5 @@ public interface MainService {
     MessageHistoryResponse getLastMessages(MessageHistoryRequest messageHistoryRequest);
     MessageHistoryResponse getAllMessages(MessageHistoryRequest messageHistoryRequest);
     void sendTextMessage(TextMessageRequest request, Long userId);
+    MessageResponse deleteTextMessage(Long chatId, Integer messageId, Long userId);
 }

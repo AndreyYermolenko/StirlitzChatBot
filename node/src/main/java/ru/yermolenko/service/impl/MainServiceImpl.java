@@ -3,6 +3,7 @@ package ru.yermolenko.service.impl;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.yermolenko.dao.AppUserDAO;
 import ru.yermolenko.dao.DataMessageDAO;
@@ -235,8 +236,30 @@ public class MainServiceImpl implements MainService {
     @Override
     public void sendTextMessage(TextMessageRequest request, Long userId) {
         AppUser appUser = appUserDAO.findById(userId).get();
-        sendAnswer(appUser.getFirstName() + " " + appUser.getLastName() + ": " + request.getMessage(),
-                request.getChatId().toString());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(request.getChatId().toString());
+        sendMessage.setText(appUser.getFirstName() + " " + appUser.getLastName() + ": " + request.getMessage());
+        sendAnswer(sendMessage);
+    }
+
+    @Override
+    public MessageResponse deleteTextMessage(Long chatId, Integer messageId, Long userId) {
+        DataMessage message = dataMessageDAO.findMessageByExternalServiceId(messageId);
+        if (message != null && userId.equals(message.getAppUser().getId())) {
+            DeleteMessage deleteMessage = new DeleteMessage();
+            deleteMessage.setChatId(chatId.toString());
+            deleteMessage.setMessageId(messageId);
+            sendAnswer(deleteMessage);
+            return MessageResponse.builder()
+                    .error(false)
+                    .message("Message was deleted!")
+                    .build();
+        } else {
+            return MessageResponse.builder()
+                    .error(true)
+                    .message("Message not found!")
+                    .build();
+        }
     }
 
     public void saveRawData(GeneralRecord generalRecord) {
@@ -247,11 +270,19 @@ public class MainServiceImpl implements MainService {
         rawDataDAO.save(rawData);
     }
 
+    private void sendAnswer(SendMessage message) {
+        producerService.produceAnswer(message);
+    }
+
     private void sendAnswer(String answer, String chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(answer);
         producerService.produceAnswer(sendMessage);
+    }
+
+    private void sendAnswer(DeleteMessage message) {
+        producerService.produceAnswer(message);
     }
 
     private void changeUserState(AppUser appUser, UserState newState) {

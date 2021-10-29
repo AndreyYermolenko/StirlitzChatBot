@@ -3,6 +3,7 @@ package ru.yermolenko.controller;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.yermolenko.model.GeneralRecord;
@@ -28,7 +29,7 @@ public class MainController {
         } else if (update.getEditedMessage() != null) {
             externalMessage = update.getEditedMessage();
         } else {
-            dispatcherBot.setView(handleUnsupportedMessageType(update));
+            dispatcherBot.sendMessage(handleUnsupportedMessageType(update));
             return;
         }
 
@@ -39,7 +40,7 @@ public class MainController {
         } else if (externalMessage.getPhoto() != null) {
             handlePhoto(externalMessage);
         } else {
-            dispatcherBot.setView(handleUnsupportedMessageType(update));
+            dispatcherBot.sendMessage(handleUnsupportedMessageType(update));
         }
     }
 
@@ -82,7 +83,11 @@ public class MainController {
     }
 
     public void setView(SendMessage sendMessage) {
-        dispatcherBot.setView(sendMessage);
+        dispatcherBot.sendMessage(sendMessage);
+    }
+
+    public void setView(DeleteMessage deleteMessage) {
+        dispatcherBot.deleteMessage(deleteMessage);
     }
 
     private SendMessage handleUnsupportedMessageType(Update update) {

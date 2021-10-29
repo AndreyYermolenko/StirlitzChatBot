@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface DataMessageDAO extends JpaRepository<DataMessage, Long> {
     DataMessage findMessageByExternalServiceId(Integer externalServiceId);
-    @Query(value = "SELECT * FROM data_messages dm WHERE dm.chat_id = :chatId ORDER BY dm.create_date LIMIT :limit",
+    @Query(value = "SELECT * FROM data_messages dm WHERE dm.chat_id = :chatId ORDER BY dm.create_date DESC LIMIT :limit",
             nativeQuery = true)
     Optional<List<DataMessage>> findLastMessagesByChatId(@Param("chatId") Long chatId, @Param("limit") Integer limit);
     Optional<List<DataMessage>> findAllByChatId(Long chatId);
